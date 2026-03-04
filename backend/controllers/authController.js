@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs'
 //token เป็นสตริงที่ถูกสร้างขึ้นโดยเซิฟเวอร์
 // และส่งกลับไปยังไคลเอนต์หลังจากที่ผู้ใช้เข้าสู่ระบบสำเร็จ
 import jwt from 'jsonwebtoken'
+import transporter from "../config/nodemailer.js"
 
 //ฟังก์ชันสำหรับการลงทะเบียนผู้ใช้ใหม่
 export const register = async (req,res) =>{
@@ -47,6 +48,14 @@ export const register = async (req,res) =>{
             sameSite: process.env.node_env === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // กำหนดอายุของ cookie เป็น 7 วัน
         })
+        const mailOption={
+            from: process.env.SENDER_EMAIL,
+            to: email,
+            subject: 'Welcome to our Website',
+            text: `Your account are create by this Email: ${email}`
+        }
+        await transporter.sendMail(mailOption)
+
         return res.json({
             success: true, message: "ลงทะเบียนสำเร็จ",
             user: {name: user.name, email: user.email}
