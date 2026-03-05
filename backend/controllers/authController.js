@@ -52,10 +52,10 @@ export const register = async (req,res) =>{
             from: process.env.SENDER_EMAIL,
             to: email,
             subject: 'Welcome to our Website',
-            text: `Your account are create by this Email ${email}`
+            text: `Hello ${name}! Your account are create by this Email ${email}`
         }
         await transporter.sendMail(mailOptions)
-        
+
         return res.json({
             success: true, message: "ลงทะเบียนสำเร็จ",
             user: {name: user.name, email: user.email}
