@@ -48,14 +48,14 @@ export const register = async (req,res) =>{
             sameSite: process.env.node_env === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // กำหนดอายุของ cookie เป็น 7 วัน
         })
-        const mailOption={
+        const mailOptions = {
             from: process.env.SENDER_EMAIL,
             to: email,
             subject: 'Welcome to our Website',
-            text: `Your account are create by this Email: ${email}`
+            text: `Your account are create by this Email ${email}`
         }
-        await transporter.sendMail(mailOption)
-
+        await transporter.sendMail(mailOptions)
+        
         return res.json({
             success: true, message: "ลงทะเบียนสำเร็จ",
             user: {name: user.name, email: user.email}
