@@ -9,6 +9,7 @@ const conn = async () =>{
     
     } catch (err) {
         console.log('Failed to connect to MongoDB:', err.message)
+        process.exit(1)
     }
 }
 export default conn
