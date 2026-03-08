@@ -1,1 +1,18 @@
-backend/.env
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Upload temp files
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
