@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema(
         key: { type: String, required: true },  // key ใน S3 สำหรับลบไฟล์
         type: {
           type: String,
-          enum: ['image', 'video'],             // รับแค่ image หรือ video เท่านั้น
+          enum: ['image', 'video'],// รับแค่ image หรือ video เท่านั้น
           required: true,
         },
       },
@@ -49,8 +49,6 @@ const postSchema = new mongoose.Schema(
     timestamps: true,
   }
 )
-
-// ============ Indexes ============
 
 // เพิ่ม index เพื่อให้ query Timeline เร็วขึ้น
 // เรียงโพสต์จากใหม่ไปเก่าตาม createdAt
