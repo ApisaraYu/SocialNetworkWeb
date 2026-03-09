@@ -10,7 +10,7 @@ import dns from 'dns/promises'
 // ฟังก์ชัน connect MongoDB จากไฟล์ config/mongodb.js
 import conn from './config/mongodb.js'
 // Router สำหรับจัดการ Authentication
-import authRouter from './routes/authroutes.js'
+import router from './routes/auth.routes.js'
 // กำหนด DNS Server เป็น Google (8.8.8.8) และ Cloudflare (1.1.1.1)
 // เพื่อให้ resolve hostname ของ MongoDB Atlas ได้ถูกต้อง
 import http from 'http'
@@ -50,7 +50,7 @@ app.use(cors({
 app.get('/', (req, res) => res.json('API is working.'))
 
 // Routes สำหรับระบบ Authentication
-app.use('/api/auth', authRouter)
+app.use('/api/auth', router)
 
 app.use(errorHandler)
 
