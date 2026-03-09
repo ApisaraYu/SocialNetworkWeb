@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 // ส่ง OTP สำหรับยืนยัน email ตอนสมัครสมาชิก
 const sendVerifyOTP = async (email, otp) => {
   const mailOptions = {
-    from: `"Social Network" <${process.env.EMAIL_USER}>`,
+    from: `"Socialio" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'ยืนยัน Email ของคุณ',
     html: `
@@ -34,7 +34,7 @@ const sendVerifyOTP = async (email, otp) => {
 // ส่ง OTP สำหรับรีเซ็ตรหัสผ่าน
 const sendResetPasswordOTP = async (email, otp) => {
   const mailOptions = {
-    from: `"Social Network" <${process.env.EMAIL_USER}>`,
+    from: `"Socialio" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'รีเซ็ตรหัสผ่าน',
     html: `
