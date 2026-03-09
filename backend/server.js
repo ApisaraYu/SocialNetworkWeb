@@ -11,11 +11,12 @@ import dns from 'dns/promises'
 import conn from './config/mongodb.js'
 // Router สำหรับจัดการ Authentication
 import router from './routes/auth.routes.js'
-// กำหนด DNS Server เป็น Google (8.8.8.8) และ Cloudflare (1.1.1.1)
-// เพื่อให้ resolve hostname ของ MongoDB Atlas ได้ถูกต้อง
+import userRouter from './routes/user.routes.js'
 import http from 'http'
 import { initSocket } from './config/socket.js'
 import errorHandler from './middleware/error.middleware.js'
+// กำหนด DNS Server เป็น Google (8.8.8.8) และ Cloudflare (1.1.1.1)
+// เพื่อให้ resolve hostname ของ MongoDB Atlas ได้ถูกต้อง
 dns.setServers(['8.8.8.8', '1.1.1.1'])
 
 const app = express()
@@ -51,6 +52,8 @@ app.get('/', (req, res) => res.json('API is working.'))
 
 // Routes สำหรับระบบ Authentication
 app.use('/api/auth', router)
+// Routes สำหรับระบบ User
+app.use('/api/users', userRouter)
 
 app.use(errorHandler)
 
