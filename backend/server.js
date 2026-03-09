@@ -14,8 +14,8 @@ import authRouter from './routes/authroutes.js'
 // กำหนด DNS Server เป็น Google (8.8.8.8) และ Cloudflare (1.1.1.1)
 // เพื่อให้ resolve hostname ของ MongoDB Atlas ได้ถูกต้อง
 import http from 'http'
-import { initSocket } from './src/config/socket.js'
-import errorHandler from './src/middleware/error.middleware.js'
+import { initSocket } from './config/socket.js'
+import errorHandler from './middleware/error.middleware.js'
 dns.setServers(['8.8.8.8', '1.1.1.1'])
 
 const app = express()
