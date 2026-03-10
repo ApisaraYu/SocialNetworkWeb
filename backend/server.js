@@ -12,7 +12,10 @@ import conn from './config/mongodb.js'
 // Router สำหรับจัดการ Authentication
 import authRouter from './routes/auth.routes.js'
 import userRouter from './routes/user.routes.js'
-import postRouter from './routes/post.routes.js' 
+import postRouter from './routes/post.routes.js'
+import likeRouter from './routes/like.routes.js'
+import chatRouter from './routes/chat.routes.js'
+import groupRouter from './routes/group.routes.js'
 import http from 'http'
 import { initSocket } from './config/socket.js'
 import errorHandler from './middleware/error.middleware.js'
@@ -57,6 +60,12 @@ app.use('/api/auth', authRouter)
 app.use('/api/users', userRouter)
 // Routes สำหรับระบบ Post
 app.use('/api/posts', postRouter)
+// Routes สำหรับระบบ Like
+app.use('/api/likes', likeRouter)
+// Routes สำหรับระบบ Chat
+app.use('/api/chats', chatRouter)
+// Routes สำหรับระบบ Group
+app.use('/api/groups', groupRouter)
 
 app.use(errorHandler)
 
