@@ -10,8 +10,9 @@ import dns from 'dns/promises'
 // ฟังก์ชัน connect MongoDB จากไฟล์ config/mongodb.js
 import conn from './config/mongodb.js'
 // Router สำหรับจัดการ Authentication
-import router from './routes/auth.routes.js'
+import authRouter from './routes/auth.routes.js'
 import userRouter from './routes/user.routes.js'
+import postRouter from './routes/post.routes.js' 
 import http from 'http'
 import { initSocket } from './config/socket.js'
 import errorHandler from './middleware/error.middleware.js'
@@ -51,9 +52,11 @@ app.use(cors({
 app.get('/', (req, res) => res.json('API is working.'))
 
 // Routes สำหรับระบบ Authentication
-app.use('/api/auth', router)
+app.use('/api/auth', authRouter)
 // Routes สำหรับระบบ User
 app.use('/api/users', userRouter)
+// Routes สำหรับระบบ Post
+app.use('/api/posts', postRouter)
 
 app.use(errorHandler)
 
