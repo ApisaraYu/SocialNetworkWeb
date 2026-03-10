@@ -1,5 +1,5 @@
 import React from 'react'
-import logo from './assets/Socialio_logo.png'
+import logo from './assets/SOCIALIO_logo.png'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'  // 👈 เพิ่มตรงนี้
 import Home from './pages/Home'
 import Login from './pages/Login'
