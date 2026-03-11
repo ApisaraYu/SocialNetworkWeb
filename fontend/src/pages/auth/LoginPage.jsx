@@ -31,7 +31,7 @@ const LoginPage = () => {
       }
 
       // เก็บ access token ไว้ใน localStorage
-      localStorage.setItem('accessToken', data.data.accessToken)
+      localStorage.setItem('accessToken', data.accessToken)
 
       // ไปหน้า Timeline
       navigate('/timeline')

@@ -1,20 +1,20 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'  // 👈 เพิ่มตรงนี้
+import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
-import RegisterPage from './pages/auth/RegisterPage'
 import LoginPage from './pages/auth/LoginPage'
-
-import Home from './pages/Home'
+import RegisterPage from './pages/auth/RegisterPage'
+import VerifyEmailPage from './pages/auth/VerifyEmailPage'
+import TimelinePage from './pages/TimelinePage'
 
 function App() {
   return (
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/verify-email" element={<div>Verify Email (coming soon)</div>} />
-            <Route path="/forgot-password" element={<div>Forgot Password (coming soon)</div>} />
-          </Routes>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/timeline" element={<TimelinePage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<div>Forgot Password coming soon</div>} />
+    </Routes>
   )
 }
 
