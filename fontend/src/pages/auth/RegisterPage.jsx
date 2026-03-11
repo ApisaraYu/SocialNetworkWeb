@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const validatePassword = (password) => {
+  if (password.length < 8) return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'
+  if (!/[A-Z]/.test(password)) return 'รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว'
+  if (!/[a-z]/.test(password)) return 'รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว'
+  if (!/[0-9]/.test(password)) return 'รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว'
+  return null
+}
 const RegisterPage = () => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
@@ -17,6 +24,8 @@ const RegisterPage = () => {
 
   const handleSubmit = async () => {
     setError('')
+    const passwordError = validatePassword(form.password)
+    if (passwordError) return setError(passwordError)
     setLoading(true)
     try {
       const res = await fetch('http://localhost:4000/api/auth/register', {

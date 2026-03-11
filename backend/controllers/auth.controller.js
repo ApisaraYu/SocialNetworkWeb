@@ -4,6 +4,14 @@ import { sendTokenResponse } from '../utils/generateToken.js'
 import { sendVerifyOTP, sendResetPasswordOTP } from '../services/email.service.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
 
+// ============ ตรวจสอบ password ============
+const validatePassword = (password) => {
+  if (password.length < 8) return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'
+  if (!/[A-Z]/.test(password)) return 'รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว'
+  if (!/[a-z]/.test(password)) return 'รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว'
+  if (!/[0-9]/.test(password)) return 'รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว'
+  return null
+}
 // sign up
 export const register = async (req, res, next) => {
   try {
@@ -16,8 +24,11 @@ export const register = async (req, res, next) => {
         existingUser.email === email ? 'Email นี้ถูกใช้งานแล้ว' : 'Username นี้ถูกใช้งานแล้ว'
       )
     }
-
-    // สร้าง OTP สำหรับยืนยัน email
+    // ตรวจสอบ password
+    const passwordError = validatePassword(password)
+    if (passwordError) return errorResponse(res, 400, passwordError)
+    
+      // สร้าง OTP สำหรับยืนยัน email
     const otp = generateOTP()
     const hashedOTP = await hashOTP(otp)
     const otpExpire = getOTPExpire(10) // หมดอายุใน 10 นาที

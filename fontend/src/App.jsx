@@ -4,6 +4,8 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import VerifyEmailPage from './pages/auth/VerifyEmailPage'
 import TimelinePage from './pages/TimelinePage'
+import ForgotPasswordPage from './pages/auth/ForgetPasswordPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 
 function App() {
   return (
@@ -13,7 +15,8 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/timeline" element={<TimelinePage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
-      <Route path="/forgot-password" element={<div>Forgot Password coming soon</div>} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
   )
 }
