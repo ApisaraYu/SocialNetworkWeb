@@ -18,12 +18,12 @@ const sendVerifyOTP = async (email, otp) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">ยืนยัน Email ของคุณ</h2>
-        <p>กรอกรหัส OTP นี้เพื่อยืนยัน Email ของคุณ</p>
+        <p>สวัสดีคุณ ${email} คุณได้ทำการสมัครสมาชิกเว็บไซต์ของเรากรุณากรอกรหัส OTP นี้เพื่อยืนยัน Email ของคุณ</p>
         <div style="background: #f4f4f4; padding: 20px; text-align: center; border-radius: 8px;">
           <h1 style="color: #4CAF50; letter-spacing: 8px;">${otp}</h1>
         </div>
         <p style="color: #999;">รหัสนี้จะหมดอายุใน <strong>10 นาที</strong></p>
-        <p style="color: #999;">หากคุณไม่ได้สมัครสมาชิก กรุณาเพิกเฉยต่ออีเมลนี้</p>
+        <p style="color: #999;">หากคุณไม่ได้สมัครสมาชิก กรุณาเพิกเฉยต่ออีเมลนี้ และกรุณาอย่าตอบกลับเนื่องจากนี่เป็นข้อความอัตโนมัติ</p>
       </div>
     `,
   }
@@ -40,12 +40,12 @@ const sendResetPasswordOTP = async (email, otp) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">รีเซ็ตรหัสผ่าน</h2>
-        <p>กรอกรหัส OTP นี้เพื่อรีเซ็ตรหัสผ่านของคุณ</p>
+        <p>สวัสดีคุณ ${email} คุณได้ทำการขอรีเซ็ตรหัสผ่านกรุณากรอกรหัส OTP นี้เพื่อรีเซ็ตรหัสผ่านของคุณ</p>
         <div style="background: #f4f4f4; padding: 20px; text-align: center; border-radius: 8px;">
           <h1 style="color: #f44336; letter-spacing: 8px;">${otp}</h1>
         </div>
         <p style="color: #999;">รหัสนี้จะหมดอายุใน <strong>10 นาที</strong></p>
-        <p style="color: #999;">หากคุณไม่ได้ขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่ออีเมลนี้</p>
+        <p style="color: #999;">หากคุณไม่ได้ขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่ออีเมลนี้ และกรุณาอย่าตอบกลับเนื่องจากนี่เป็นข้อความอัตโนมัติ</p>
       </div>
     `,
   }
