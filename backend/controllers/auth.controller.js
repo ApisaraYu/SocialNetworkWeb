@@ -199,6 +199,8 @@ export const resetPassword = async (req, res, next) => {
     }
 
     // อัปเดตรหัสผ่านใหม่
+    const passwordError = validatePassword(newPassword)
+    if (passwordError) return errorResponse(res, 400, passwordError)
     user.password = newPassword
     user.resetPasswordOtp = ''
     user.resetPasswordOtpExpire = null
