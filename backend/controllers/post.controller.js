@@ -1,7 +1,7 @@
 import Post from '../models/Post.js'
 import User from '../models/User.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
-import { deleteFiles, getMediaWithUrls } from '../services/upload.service.js'
+import { deleteFiles,getPresignedUrl} from '../services/upload.service.js'
 
 // สร้างโพสต์
 export const createPost = async (req, res, next) => {
@@ -63,8 +63,23 @@ export const getTimeline = async (req, res, next) => {
       visibility: { $in: ['public', 'friends'] },
     })
 
+    const postsWithUrls = await Promise.all(
+      posts.map(async (post) => {
+        const postObj = post.toObject()
+        if (postObj.media?.length > 0) {
+          postObj.media = await Promise.all(
+            postObj.media.map(async (m) => ({
+            ...m,
+            url: await getPresignedUrl(m.key),
+          }))
+        )
+      }
+    return postObj
+  })
+)
+
     return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', {
-      posts,
+      posts: postsWithUrls,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalPosts: total,
