@@ -5,6 +5,7 @@ import {
   updateProfile,
   updateAvatar,
   updateCoverPhoto,
+  searchUsers,
   sendFriendRequest,
   respondFriendRequest,
   removeFriend,
@@ -37,6 +38,9 @@ router.get('/:id', getUserById)
 // เพื่อน
 // GET /api/users/:id/friends
 router.get('/:id/friends', getFriends)
+
+// GET /api/users/search
+router.get('/search', searchUsers)
 
 // POST /api/users/:id/friend-request
 router.post('/:id/friend-request', sendFriendRequest)

@@ -99,6 +99,25 @@ export const updateCoverPhoto = async (req, res, next) => {
   }
 }
 
+// ค้นหา user
+export const searchUsers = async (req, res, next) => {
+  try {
+    const { q } = req.query
+    if (!q) return errorResponse(res, 400, 'กรุณากรอกคำค้นหา')
+
+    const users = await User.find({
+      username: { $regex: q, $options: 'i' },
+      _id: { $ne: req.user.id }, // ไม่แสดงตัวเอง
+    })
+      .select('username avatar')
+      .limit(10)
+
+    return successResponse(res, 200, 'ค้นหาสำเร็จ', users)
+  } catch (error) {
+    next(error)
+  }
+}
+
 // ส่งคำขอเป็นเพื่อน
 export const sendFriendRequest = async (req, res, next) => {
   try {
