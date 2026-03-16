@@ -117,9 +117,24 @@ export const getUserPosts = async (req, res, next) => {
       .populate('author', 'username avatar')
 
     const total = await Post.countDocuments({ author: req.params.id })
+    
+    const postsWithUrls = await Promise.all(
+      posts.map(async (post) => {
+        const postObj = post.toObject()
+        if (postObj.media?.length > 0) {
+          postObj.media = await Promise.all(
+            postObj.media.map(async (m) => ({
+              ...m,
+              url: await getPresignedUrl(m.key),
+            }))
+          )
+        }
+        return postObj
+      })
+    )
 
     return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', {
-      posts,
+      posts: postsWithUrls,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalPosts: total,
