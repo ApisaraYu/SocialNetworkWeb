@@ -148,6 +148,39 @@ export const sendFriendRequest = async (req, res, next) => {
     next(error)
   }
 }
+// ดึงคำขอเพื่อนที่รอตอบรับ
+export const getFriendRequests = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate('friendRequests.from', 'username avatar')
+
+    return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', user.friendRequests)
+  } catch (error) {
+    next(error)
+  }
+}
+// เช็คสถานะเพื่อน
+export const getFriendStatus = async (req, res, next) => {
+  try {
+    const targetId = req.params.id
+    const user = await User.findById(req.user.id)
+
+    // เช็คว่าเป็นเพื่อนกันแล้วไหม
+    if (user.friends.some(f => f.toString() === targetId)) {
+      return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', { status: 'friends' })
+    }
+
+    // เช็คว่าส่งคำขอไปแล้วไหม
+    const targetUser = await User.findById(targetId)
+    if (targetUser.friendRequests.some(r => r.from.toString() === req.user.id)) {
+      return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', { status: 'pending' })
+    }
+
+    return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', { status: 'none' })
+  } catch (error) {
+    next(error)
+  }
+}
 // ตอบรับ/ปฏิเสธคำขอเป็นเพื่อน
 export const respondFriendRequest = async (req, res, next) => {
   try {

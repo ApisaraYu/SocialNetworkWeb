@@ -6,6 +6,8 @@ import VerifyEmailPage from './pages/auth/VerifyEmailPage'
 import TimelinePage from './pages/TimelinePage'
 import ForgotPasswordPage from './pages/auth/ForgetPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import ProfilePage from './pages/ProfilePage'
+import FriendRequestsPage from './pages/FriendRequestsPage'
 
 function App() {
   return (
@@ -17,6 +19,9 @@ function App() {
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/profile/:id" element={<ProfilePage />} />
+      <Route path="/friend-requests" element={<FriendRequestsPage />} />
     </Routes>
   )
 }

@@ -8,6 +8,8 @@ import {
   searchUsers,
   sendFriendRequest,
   respondFriendRequest,
+  getFriendRequests,
+  getFriendStatus,
   removeFriend,
   getFriends,
 } from '../controllers/user.controller.js'
@@ -32,6 +34,18 @@ router.put('/me/avatar', uploadSingle('avatar'), updateAvatar)
 // PUT /api/users/me/cover
 router.put('/me/cover', uploadSingle('coverPhoto'), updateCoverPhoto)
 
+// GET /api/users/search
+router.get('/search', searchUsers)
+
+// GET /api/users/friend-requests
+router.get('/friend-requests', getFriendRequests)
+
+// PUT /api/users/friend-request/respond
+router.put('/friend-request/respond', respondFriendRequest)
+
+// GET /api/users/:id/friend-status
+router.get('/:id/friend-status', getFriendStatus)
+
 // GET /api/users/:id
 router.get('/:id', getUserById)
 
@@ -39,14 +53,8 @@ router.get('/:id', getUserById)
 // GET /api/users/:id/friends
 router.get('/:id/friends', getFriends)
 
-// GET /api/users/search
-router.get('/search', searchUsers)
-
 // POST /api/users/:id/friend-request
 router.post('/:id/friend-request', sendFriendRequest)
-
-// PUT /api/users/friend-request/respond
-router.put('/friend-request/respond', respondFriendRequest)
 
 // DELETE /api/users/:id/friend
 router.delete('/:id/friend', removeFriend)
