@@ -252,14 +252,22 @@ const ProfilePage = () => {
               {post.content && (
                 <p className="text-sm text-gray-700 leading-relaxed mb-3">{post.content}</p>
               )}
-
+              
               {/* Post Media */}
               {post.media?.length > 0 && (
-                <img
-                  src={post.media[0].url}
-                  alt="post"
-                  className="w-full max-h-80 object-cover rounded-xl mb-3 cursor-pointer hover:opacity-95 transition"
-                />
+                post.media[0].type === 'video' ? (
+                  <video
+                    src={post.media[0].url}
+                    controls
+                    className="w-full max-h-80 rounded-xl mb-3 cursor-pointer"
+                  />
+                ) : (
+                  <img
+                    src={post.media[0].url}
+                    alt="post"
+                    className="w-full max-h-80 object-cover rounded-xl mb-3 cursor-pointer hover:opacity-95 transition"
+                  />
+                )
               )}
 
               {/* Post Stats */}
