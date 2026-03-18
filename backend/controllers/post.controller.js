@@ -15,8 +15,8 @@ export const createPost = async (req, res, next) => {
 
     // แปลงไฟล์ที่อัปโหลดเป็น media array
     const media = req.files?.map((file) => ({
-      url: file.location,
-      key: file.key,
+      url: file.path,
+      key: file.filename,
       type: file.mimetype.startsWith('image/') ? 'image' : 'video',
     })) || []
 
@@ -70,7 +70,7 @@ export const getTimeline = async (req, res, next) => {
           postObj.media = await Promise.all(
             postObj.media.map(async (m) => ({
             ...m,
-            url: await getPresignedUrl(m.key),
+            url: m.url
           }))
         )
       }
@@ -125,7 +125,7 @@ export const getUserPosts = async (req, res, next) => {
           postObj.media = await Promise.all(
             postObj.media.map(async (m) => ({
               ...m,
-              url: await getPresignedUrl(m.key),
+              url: m.url
             }))
           )
         }

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
 
 const TimelinePage = () => {
+  const navigate = useNavigate()
   const [posts, setPosts] = useState([])
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -175,11 +177,19 @@ const TimelinePage = () => {
 
               {/* Post Media */}
               {post.media?.length > 0 && (
-                <img
-                  src={post.media[0].url}
-                  alt="post"
-                  className="w-full max-h-80 object-cover rounded-xl mb-3 cursor-pointer hover:opacity-95 transition"
-                />
+                post.media[0].type === 'video' ? (
+                  <video
+                    src={post.media[0].url}
+                    controls
+                    className="w-full max-h-80 rounded-xl mb-3 cursor-pointer"
+                  />
+                ) : (
+                  <img
+                    src={post.media[0].url}
+                    alt="post"
+                    className="w-full max-h-80 object-cover rounded-xl mb-3 cursor-pointer hover:opacity-95 transition"
+                  />
+                )
               )}
 
               {/* Post Stats */}

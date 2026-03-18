@@ -256,8 +256,8 @@ export const createGroupPost = async (req, res, next) => {
     }
 
     const media = req.files?.map((file) => ({
-      url: file.location,
-      key: file.key,
+      url: file.path,
+      key: file.filename,
       type: file.mimetype.startsWith('image/') ? 'image' : 'video',
     })) || []
 
