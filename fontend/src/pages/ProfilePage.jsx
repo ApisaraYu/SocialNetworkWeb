@@ -165,6 +165,24 @@ const handleComment = async (postId) => {
   }
 }
 
+  const handleChat = async () => {
+    try {
+      const res = await fetch('http://localhost:4000/api/chats', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      })
+      if (res.ok) {
+        navigate('/chat')
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   if (loading) {
     return (
       <Layout>
@@ -267,7 +285,7 @@ const handleComment = async (postId) => {
                   )}
                   {/* ปุ่มแชท */}
                   <button
-                    onClick={() => navigate('/chat')}
+                    onClick={handleChat}
                     className="flex-1 py-2 bg-gray-100 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-200 transition cursor-pointer"
                   >
                     แชท

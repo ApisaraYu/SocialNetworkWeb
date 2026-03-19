@@ -48,7 +48,7 @@ app.use(cookieParser())
 // อนุญาตให้ Frontend ที่ระบุใน CLIENT_URL เรียก API ได้
 // credentials: true = อนุญาตให้ส่ง cookies มาด้วย
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }))
 

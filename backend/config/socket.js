@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import jwt from 'jsonwebtoken'
 
 let io
 
@@ -13,6 +14,29 @@ const initSocket = (server) => {
     },
   })
 
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token
+    if (!token) return next(new Error('Unauthorized'))
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      socket.userId = decoded.id
+      next()
+    } catch {
+      next(new Error('Unauthorized'))
+    }
+  })
+
+  io.on('connection', (socket) => {
+    console.log('User connected:', socket.userId)
+
+    // join room ของตัวเอง เพื่อรับข้อความ
+    socket.join(socket.userId)
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.userId)
+    })
+  })
+  
   return io
 }
 

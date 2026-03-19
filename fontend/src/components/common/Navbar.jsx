@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useSocket } from '../../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
+  const { unreadCount, setUnreadCount } = useSocket()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [results, setResults] = useState([])
@@ -141,10 +143,18 @@ const Navbar = () => {
 
         {/* แชท */}
         <button
-          onClick={() => navigate('/chat')}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition cursor-pointer"
+          onClick={() => {
+            navigate('/chat')
+            setUnreadCount(0) // clear เมื่อเปิดแชท
+          }}
+          className="relative w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition cursor-pointer"
         >
           <span className="text-white text-sm">💬</span>
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+              {unreadCount}
+            </span>
+          )}
         </button>
 
         {/* Avatar */}
