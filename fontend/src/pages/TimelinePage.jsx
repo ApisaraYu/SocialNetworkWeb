@@ -10,6 +10,9 @@ const TimelinePage = () => {
   const [posting, setPosting] = useState(false)
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
+  const [openComments, setOpenComments] = useState({}) // เก็บว่าโพสต์ไหนเปิด comment อยู่
+  const [comments, setComments] = useState({}) // เก็บ comment ของแต่ละโพสต์
+  const [commentText, setCommentText] = useState({}) // เก็บข้อความที่กำลังพิมพ์
 
   const token = localStorage.getItem('accessToken')
 
@@ -85,6 +88,48 @@ const TimelinePage = () => {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (res.ok) fetchPosts() // refresh โพสต์ใหม่
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const fetchComments = async (postId) => {
+  try {
+    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setComments((prev) => ({ ...prev, [postId]: data.data.comments }))
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const toggleComments = (postId) => {
+  const isOpen = openComments[postId]
+  setOpenComments((prev) => ({ ...prev, [postId]: !isOpen }))
+  if (!isOpen) fetchComments(postId)
+}
+
+const handleComment = async (postId) => {
+  const text = commentText[postId]?.trim()
+  if (!text) return
+  try {
+    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content: text }),
+    })
+    if (res.ok) {
+      setCommentText((prev) => ({ ...prev, [postId]: '' }))
+      fetchComments(postId)
+      fetchPosts()
+    }
   } catch (err) {
     console.error(err)
   }
@@ -228,11 +273,74 @@ const TimelinePage = () => {
                 >
                   👍 {post.likesCount || 0} ถูกใจ
                 </button>
-                <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#7C6FF7] transition cursor-pointer">
+                <button
+                  onClick={() => toggleComments(post._id)}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#7C6FF7] transition cursor-pointer">
                   💬 {post.commentsCount || 0} ความคิดเห็น
                 </button>
               </div>
+              {/* Comment Section */}
+              {openComments[post._id] && (
+                <div className="mt-3 pt-3 border-t border-gray-100">
 
+                  {/* Comment List */}
+                  <div className="flex flex-col gap-3 mb-3">
+                    {comments[post._id]?.length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center">ยังไม่มีความคิดเห็น</p>
+                    ) : (
+                      comments[post._id]?.map((comment) => (
+                        <div key={comment._id} className="flex items-start gap-2">
+                          <div
+                            onClick={() => navigate(`/profile/${comment.author?._id}`)}
+                            className="w-8 h-8 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 cursor-pointer hover:opacity-80 transition overflow-hidden"
+                          >
+                            {comment.author?.avatar?.url ? (
+                              <img src={comment.author.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              comment.author?.username?.[0]?.toUpperCase() || 'U'
+                            )}
+                          </div>
+                          <div className="flex-1 bg-gray-100 rounded-2xl px-3 py-2">
+                            <p
+                              onClick={() => navigate(`/profile/${comment.author?._id}`)}
+                              className="text-xs font-semibold text-gray-800 cursor-pointer hover:underline mb-0.5"
+                            >
+                              {comment.author?.username}
+                            </p>
+                            <p className="text-sm text-gray-700">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Comment Input */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden">
+                      {user?.avatar?.url ? (
+                        <img src={user.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        user.username?.[0]?.toUpperCase() || 'U'
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="เขียนความคิดเห็น..."
+                      value={commentText[post._id] || ''}
+                      onChange={(e) => setCommentText((prev) => ({ ...prev, [post._id]: e.target.value }))}
+                      onKeyDown={(e) => e.key === 'Enter' && handleComment(post._id)}
+                      className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm text-gray-600 outline-none focus:ring-2 focus:ring-[#7C6FF7] transition"
+                    />
+                    <button
+                      onClick={() => handleComment(post._id)}
+                      className="px-4 py-2 bg-[#7C6FF7] text-white text-sm font-semibold rounded-full hover:bg-[#6a5ee0] transition cursor-pointer"
+                    >
+                      ส่ง
+                    </button>
+                  </div>
+
+                </div>
+              )}
             </div>
           ))
         )}
