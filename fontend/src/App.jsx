@@ -8,6 +8,7 @@ import ForgotPasswordPage from './pages/auth/ForgetPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import FriendRequestsPage from './pages/FriendRequestsPage'
+import EditProfilePage from './pages/EditProfilePage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/:id" element={<ProfilePage />} />
       <Route path="/friend-requests" element={<FriendRequestsPage />} />
+      <Route path="/edit-profile" element={<EditProfilePage />} />
     </Routes>
   )
 }

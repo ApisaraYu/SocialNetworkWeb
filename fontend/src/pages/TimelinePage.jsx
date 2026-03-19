@@ -146,10 +146,15 @@ const TimelinePage = () => {
 
               {/* Post Header */}
               <div className="flex items-center gap-3 mb-3">
-                <div 
+                <div
                   onClick={() => navigate(`/profile/${post.author?._id}`)}
-                  className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0 cursor-pointer hover:opacity-80 transition">
-                  {post.author?.username?.[0]?.toUpperCase() || 'U'}
+                  className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0 cursor-pointer hover:opacity-80 transition overflow-hidden"
+                >
+                  {post.author?.avatar?.url ? (
+                    <img src={post.author.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    post.author?.username?.[0]?.toUpperCase() || 'U'
+                  )}
                 </div>
                 <div className="flex-1">
                   <p 

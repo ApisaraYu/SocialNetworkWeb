@@ -21,8 +21,12 @@ const Sidebar = () => {
         className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition"
         onClick={() => navigate('/profile')}
       >
-        <div className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0">
-          {user.username?.[0]?.toUpperCase() || 'U'}
+        <div className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
+          {user?.avatar?.url ? (
+            <img src={user.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+          ) : (
+            user.username?.[0]?.toUpperCase() || 'U'
+          )}
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-800">

@@ -9,6 +9,7 @@ const Navbar = () => {
   const [friendRequestCount, setFriendRequestCount] = useState(0)
 
   const token = localStorage.getItem('accessToken')
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
 
   // ดึงจำนวนคำขอเพื่อน
   const fetchFriendRequestCount = async () => {
@@ -145,9 +146,15 @@ const Navbar = () => {
         {/* Avatar */}
         <button
           onClick={() => navigate('/profile')}
-          className="w-9 h-9 rounded-full bg-white/30 flex items-center justify-center hover:bg-white/40 transition border-2 border-white cursor-pointer"
+          className="w-9 h-9 rounded-full bg-white/30 flex items-center justify-center hover:bg-white/40 transition border-2 border-white overflow-hidden cursor-pointer"
         >
-          <span className="text-white text-sm font-bold">U</span>
+          {user?.avatar?.url ? (
+            <img src={user.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white text-sm font-bold">
+              {user?.username?.[0]?.toUpperCase() || 'U'}
+            </span>
+          )}
         </button>
 
         {/* Logout */}
