@@ -135,6 +135,10 @@ export const sendMessage = async (req, res, next) => {
 
     // ส่งข้อความ real-time ผ่าน Socket.IO
     const io = getIO()
+    const receiverId = conversation.participants.find(
+      (p) => p.toString() !== req.user.id
+    )
+    io.to(receiverId.toString()).emit('new_message', message)
     io.to(req.params.conversationId).emit('new_message', message)
 
     return successResponse(res, 201, 'ส่งข้อความสำเร็จ', message)
@@ -154,7 +158,7 @@ export const deleteMessage = async (req, res, next) => {
       return errorResponse(res, 403, 'ไม่มีสิทธิ์ลบข้อความนี้')
     }
 
-    // ลบไฟล์ใน S3 (ถ้ามี)
+    // ลบไฟล์
     if (message.media.length > 0) {
       const keys = message.media.map((m) => m.key)
       await deleteFiles(keys)
