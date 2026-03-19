@@ -10,7 +10,7 @@ const NotFoundPage = () => {
         <h2 className="text-2xl font-bold text-gray-700 mb-2">ไม่พบหน้านี้</h2>
         <p className="text-gray-400 mb-8">หน้าที่คุณค้นหาไม่มีอยู่หรืออาจถูกลบไปแล้ว</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/timeline')}
           className="px-8 py-3 bg-[#7C6FF7] text-white font-semibold rounded-xl hover:bg-[#6a5ee0] transition cursor-pointer"
         >
           กลับหน้าหลัก
