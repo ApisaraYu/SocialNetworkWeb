@@ -78,6 +78,17 @@ const TimelinePage = () => {
       console.error(err)
     }
   }
+  const handleLike = async (postId) => {
+  try {
+    const res = await fetch(`http://localhost:4000/api/likes/Post/${postId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (res.ok) fetchPosts() // refresh โพสต์ใหม่
+  } catch (err) {
+    console.error(err)
+  }
+}
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
@@ -203,7 +214,14 @@ const TimelinePage = () => {
 
               {/* Post Stats */}
               <div className="flex gap-4 pt-3 border-t border-gray-100">
-                <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#7C6FF7] transition cursor-pointer">
+                <button
+                  onClick={() => handleLike(post._id)}
+                  className={`flex items-center gap-1 text-sm transition cursor-pointer
+                    ${post.isLiked
+                      ? 'text-[#7C6FF7] font-semibold'
+                      : 'text-gray-500 hover:text-[#7C6FF7]'
+                    }`}
+                >
                   👍 {post.likesCount || 0} ถูกใจ
                 </button>
                 <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#7C6FF7] transition cursor-pointer">

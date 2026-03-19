@@ -2,6 +2,7 @@ import Post from '../models/Post.js'
 import User from '../models/User.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
 import { deleteFiles,getPresignedUrl} from '../services/upload.service.js'
+import Like from '../models/Like.js'
 
 // สร้างโพสต์
 export const createPost = async (req, res, next) => {
@@ -66,17 +67,21 @@ export const getTimeline = async (req, res, next) => {
     const postsWithUrls = await Promise.all(
       posts.map(async (post) => {
         const postObj = post.toObject()
+
+        // เช็คว่า user นี้ like แล้วไหม
+        const liked = await Like.findOne({
+          user: req.user.id,
+          targetId: postObj._id,
+          targetType: 'Post',
+        })
+        postObj.isLiked = !!liked
+
         if (postObj.media?.length > 0) {
-          postObj.media = await Promise.all(
-            postObj.media.map(async (m) => ({
-            ...m,
-            url: m.url
-          }))
-        )
-      }
-    return postObj
-  })
-)
+          postObj.media = postObj.media.map((m) => ({ ...m, url: m.url }))
+        }
+        return postObj
+      })
+    )
 
     return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', {
       posts: postsWithUrls,
@@ -121,13 +126,17 @@ export const getUserPosts = async (req, res, next) => {
     const postsWithUrls = await Promise.all(
       posts.map(async (post) => {
         const postObj = post.toObject()
+
+        // เช็คว่า user นี้ like แล้วไหม
+        const liked = await Like.findOne({
+          user: req.user.id,
+          targetId: postObj._id,
+          targetType: 'Post',
+        })
+        postObj.isLiked = !!liked
+
         if (postObj.media?.length > 0) {
-          postObj.media = await Promise.all(
-            postObj.media.map(async (m) => ({
-              ...m,
-              url: m.url
-            }))
-          )
+          postObj.media = postObj.media.map((m) => ({ ...m, url: m.url }))
         }
         return postObj
       })
