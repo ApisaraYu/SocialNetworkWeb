@@ -248,7 +248,7 @@ const handleComment = async (postId) => {
                       onClick={handleRemoveFriend}
                       className="flex-1 py-2 bg-gray-100 text-gray-600 text-sm font-semibold rounded-xl hover:bg-red-50 hover:text-red-500 transition cursor-pointer"
                     >
-                      เพื่อนแล้ว
+                      เลิกเป็นเพื่อน
                     </button>
                   ) : friendStatus === 'pending' ? (
                     <button
