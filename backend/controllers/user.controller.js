@@ -64,8 +64,8 @@ export const updateAvatar = async (req, res, next) => {
 
     // อัปเดตรูปใหม่
     user.avatar = {
-      url: req.file.location,
-      key: req.file.key,
+      url: req.file.path,
+      key: req.file.filename,
     }
 
     await user.save()
@@ -88,8 +88,8 @@ export const updateCoverPhoto = async (req, res, next) => {
     }
 
     user.coverPhoto = {
-      url: req.file.location,
-      key: req.file.key,
+      url: req.file.path,
+      key: req.file.filename,
     }
 
     await user.save()
@@ -190,7 +190,7 @@ export const respondFriendRequest = async (req, res, next) => {
     // หาคำขอที่ต้องการตอบรับ
     const requestIndex = user.friendRequests.findIndex(
       (r) => r.from.toString() === fromUserId
-    )
+    ) 
     if (requestIndex === -1) return errorResponse(res, 404, 'ไม่พบคำขอเป็นเพื่อน')
 
     if (action === 'accept') {
