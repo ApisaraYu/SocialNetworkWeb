@@ -102,8 +102,12 @@ const Navbar = () => {
                 }}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition"
               >
-                <div className="w-8 h-8 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                  {user.username?.[0]?.toUpperCase() || 'U'}
+                <div className="w-8 h-8 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden">
+                  {user.avatar?.url ? (
+                    <img src={user.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    user.username?.[0]?.toUpperCase() || 'U'
+                  )}
                 </div>
                 <p className="text-sm font-semibold text-gray-800">{user.username}</p>
               </div>

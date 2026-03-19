@@ -101,9 +101,13 @@ const TimelinePage = () => {
           <div className="flex items-center gap-3 mb-3">
             <div
               onClick={() => navigate('/profile')}
-              className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+              className="w-10 h-10 rounded-full bg-[#7C6FF7] flex items-center justify-center text-white font-bold flex-shrink-0 cursor-pointer hover:opacity-80 transition overflow-hidden"
             >
-              {user.username?.[0]?.toUpperCase() || 'U'}
+              {user?.avatar?.url ? (
+                <img src={user.avatar.url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                user.username?.[0]?.toUpperCase() || 'U'
+              )}
             </div>
             <input
               type="text"
