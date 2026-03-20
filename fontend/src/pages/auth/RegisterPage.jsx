@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_URL from '../../services/api'
 import { useNavigate } from 'react-router-dom'
 
 const validatePassword = (password) => {
@@ -28,7 +29,7 @@ const RegisterPage = () => {
     if (passwordError) return setError(passwordError)
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4000/api/auth/register', {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

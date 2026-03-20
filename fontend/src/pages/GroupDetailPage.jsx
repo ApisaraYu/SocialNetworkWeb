@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import API_URL from '../services/api'
 import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
 
@@ -31,7 +32,7 @@ const GroupDetailPage = () => {
   // ดึงข้อมูลกลุ่ม
   const fetchGroup = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/groups/${groupId}`, {
+      const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -44,7 +45,7 @@ const GroupDetailPage = () => {
   // ดึงโพสต์ในกลุ่ม
   const fetchPosts = async () => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}/posts`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}/posts`, {
             headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()
@@ -60,7 +61,7 @@ const GroupDetailPage = () => {
   }
   const fetchPendingRequests = async () => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
             headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()
@@ -90,7 +91,7 @@ const GroupDetailPage = () => {
   // เข้าร่วมกลุ่ม
   const handleJoin = async () => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}/join`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}/join`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
         })
@@ -110,7 +111,7 @@ const GroupDetailPage = () => {
   // admin อนุมัติเข้ากลุ่ม
   const handleApprove = async (userId, action) => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}/join-request`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}/join-request`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -130,7 +131,7 @@ const GroupDetailPage = () => {
   // ออกจากกลุ่ม
   const handleLeave = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/groups/${groupId}/leave`, {
+      const res = await fetch(`${API_URL}/api/groups/${groupId}/leave`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -145,7 +146,7 @@ const GroupDetailPage = () => {
 
   const handleDelete = async () => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
         })
@@ -162,7 +163,7 @@ const GroupDetailPage = () => {
   const handleEdit = async () => {
   if (!editForm.name) return
   try {
-    const res = await fetch(`http://localhost:4000/api/groups/${groupId}`, {
+    const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
         body: JSON.stringify(editForm),
@@ -181,7 +182,7 @@ const GroupDetailPage = () => {
   try {
     const formData = new FormData()
     formData.append('avatar', file)
-    const res = await fetch(`http://localhost:4000/api/groups/${groupId}/avatar`, {
+    const res = await fetch(`${API_URL}/api/groups/${groupId}/avatar`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -198,7 +199,7 @@ const GroupDetailPage = () => {
     try {
         const formData = new FormData()
         formData.append('coverPhoto', file)
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}/cover`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}/cover`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -218,7 +219,7 @@ const GroupDetailPage = () => {
       if (content) formData.append('content', content)
       if (file) formData.append('media', file)
 
-      const res = await fetch(`http://localhost:4000/api/groups/${groupId}/posts`, {
+      const res = await fetch(`${API_URL}/api/groups/${groupId}/posts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -237,7 +238,7 @@ const GroupDetailPage = () => {
   }
   const handleLike = async (postId) => {
   try {
-        const res = await fetch(`http://localhost:4000/api/likes/GroupPost/${postId}`, {
+        const res = await fetch(`${API_URL}/api/likes/GroupPost/${postId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         })
@@ -266,7 +267,7 @@ const GroupDetailPage = () => {
 
   const fetchComments = async (postId) => {
   try {
-        const res = await fetch(`http://localhost:4000/api/groups/${groupId}/posts/${postId}/comments`, {
+        const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}/comments`, {
       headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()
@@ -288,7 +289,7 @@ const GroupDetailPage = () => {
         const text = commentText[postId]?.trim()
         if (!text) return
         try {
-            const res = await fetch(`http://localhost:4000/api/groups/${groupId}/posts/${postId}/comments`, {
+            const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}/comments`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -313,7 +314,7 @@ const GroupDetailPage = () => {
   // ลบโพสต์
   const handleDeletePost = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:4000/api/groups/${groupId}/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

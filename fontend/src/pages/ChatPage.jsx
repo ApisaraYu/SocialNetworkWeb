@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSocket } from '../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
+import API_URL from '../services/api'
 import Layout from '../components/common/Layout'
 
 const ChatPage = () => {
@@ -21,7 +22,7 @@ const ChatPage = () => {
   // ดึงรายการแชท
   const fetchConversations = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/chats', {
+      const res = await fetch(`${API_URL}/api/chats`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -35,7 +36,7 @@ const ChatPage = () => {
   const fetchMessages = async (convId) => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:4000/api/chats/${convId}/messages`, {
+      const res = await fetch(`${API_URL}/api/chats/${convId}/messages`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -75,7 +76,7 @@ const ChatPage = () => {
     if (socket) {
       socket.emit('join_room', conv._id)
     }
-    await fetch(`http://localhost:4000/api/chats/${conv._id}/read`, {
+    await fetch(`${API_URL}/api/chats/${conv._id}/read`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -96,7 +97,7 @@ const ChatPage = () => {
       if (text.trim()) formData.append('content', text)
       if (file) formData.append('media', file)
 
-      const res = await fetch(`http://localhost:4000/api/chats/${selectedConv._id}/messages`, {
+      const res = await fetch(`${API_URL}/api/chats/${selectedConv._id}/messages`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

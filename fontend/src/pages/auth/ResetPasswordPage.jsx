@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_URL from '../../services/api'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const validatePassword = (password) => {
@@ -31,7 +32,7 @@ const ResetPasswordPage = () => {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4000/api/auth/reset-password', {
+      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: form.otp, newPassword: form.newPassword }),
@@ -57,7 +58,7 @@ const ResetPasswordPage = () => {
     setSuccess('')
     setResending(true)
     try {
-      const res = await fetch('http://localhost:4000/api/auth/forgot-password', {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

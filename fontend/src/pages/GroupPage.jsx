@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import API_URL from '../services/api'
 import Layout from '../components/common/Layout'
 
 const GroupPage = () => {
@@ -23,7 +24,7 @@ const GroupPage = () => {
   const fetchMyGroups = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4000/api/groups/my', {
+      const res = await fetch(`${API_URL}/api/groups/my`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -44,7 +45,7 @@ const GroupPage = () => {
       return
     }
     try {
-      const res = await fetch(`http://localhost:4000/api/groups/search?q=${value}`, {
+      const res = await fetch(`${API_URL}/api/groups/search?q=${value}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -59,7 +60,7 @@ const GroupPage = () => {
   if (!createForm.name) return
   try {
     // สร้างกลุ่มก่อน
-    const res = await fetch('http://localhost:4000/api/groups', {
+    const res = await fetch(`${API_URL}/api/groups`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -76,7 +77,7 @@ const GroupPage = () => {
     if (avatarFile) {
       const formData = new FormData()
       formData.append('avatar', avatarFile)
-      await fetch(`http://localhost:4000/api/groups/${groupId}/avatar`, {
+      await fetch(`${API_URL}/api/groups/${groupId}/avatar`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -87,7 +88,7 @@ const GroupPage = () => {
     if (coverFile) {
       const formData = new FormData()
       formData.append('coverPhoto', coverFile)
-      await fetch(`http://localhost:4000/api/groups/${groupId}/cover`, {
+      await fetch(`${API_URL}/api/groups/${groupId}/cover`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

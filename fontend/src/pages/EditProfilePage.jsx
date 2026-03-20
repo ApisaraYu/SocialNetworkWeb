@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import API_URL from '../services/api'
 import Layout from '../components/common/Layout'
 
 const EditProfilePage = () => {
@@ -20,7 +21,7 @@ const EditProfilePage = () => {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/users/me', {
+        const res = await fetch(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()
@@ -62,7 +63,7 @@ const EditProfilePage = () => {
 
     try {
       // 1. อัปเดต username และ bio
-      const res = await fetch('http://localhost:4000/api/users/me', {
+      const res = await fetch(`${API_URL}/api/users/me`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -81,7 +82,7 @@ const EditProfilePage = () => {
       if (avatarFile) {
         const formData = new FormData()
         formData.append('avatar', avatarFile)
-        const avatarRes = await fetch('http://localhost:4000/api/users/me/avatar', {
+        const avatarRes = await fetch(`${API_URL}/api/users/me/avatar`, {
           method: 'PUT',
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
@@ -96,7 +97,7 @@ const EditProfilePage = () => {
       if (coverFile) {
         const formData = new FormData()
         formData.append('coverPhoto', coverFile)
-        await fetch('http://localhost:4000/api/users/me/cover', {
+        await fetch(`${API_URL}/api/users/me/cover`, {
           method: 'PUT',
           headers: { Authorization: `Bearer ${token}` },
           body: formData,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import API_URL from '../services/api'
 import Layout from '../components/common/Layout'
 
 const FriendRequestsPage = () => {
@@ -10,7 +11,7 @@ const FriendRequestsPage = () => {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/users/friend-requests', {
+      const res = await fetch(`${API_URL}/api/users/friend-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -28,7 +29,7 @@ const FriendRequestsPage = () => {
 
   const handleRespond = async (userId, action) => {
     try {
-      const res = await fetch('http://localhost:4000/api/users/friend-request/respond', {
+      const res = await fetch(`${API_URL}/api/users/friend-request/respond`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

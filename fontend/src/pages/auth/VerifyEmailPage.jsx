@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_URL from '../../services/api'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const VerifyEmailPage = () => {
@@ -17,7 +18,7 @@ const VerifyEmailPage = () => {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4000/api/auth/verify-email', {
+      const res = await fetch(`${API_URL}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -43,7 +44,7 @@ const VerifyEmailPage = () => {
     setSuccess('')
     setResending(true)
     try {
-      const res = await fetch('http://localhost:4000/api/auth/resend-otp', {
+      const res = await fetch(`${API_URL}/api/auth/resend-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

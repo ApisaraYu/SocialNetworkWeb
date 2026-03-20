@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
+import API_URL from '../services/api'
 
 const ProfilePage = () => {
   const { id } = useParams()
@@ -25,7 +26,7 @@ const ProfilePage = () => {
   // ดึงข้อมูล profile
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -38,7 +39,7 @@ const ProfilePage = () => {
   // ดึงโพสต์ของ user
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/posts/user/${userId}`, {
+      const res = await fetch(`${API_URL}/api/posts/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -53,7 +54,7 @@ const ProfilePage = () => {
   // ดึงรายชื่อเพื่อน
   const fetchFriends = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}/friends`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}/friends`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -66,7 +67,7 @@ const ProfilePage = () => {
   // เช็คสถานะเพื่อน
   const fetchFriendStatus = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}/friend-status`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}/friend-status`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -86,7 +87,7 @@ const ProfilePage = () => {
   // ส่งคำขอเพื่อน
   const handleFriendRequest = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}/friend-request`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}/friend-request`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -99,7 +100,7 @@ const ProfilePage = () => {
   // ลบเพื่อน
   const handleRemoveFriend = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}/friend`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}/friend`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -114,7 +115,7 @@ const ProfilePage = () => {
 
   const handleLike = async (postId) => {
   try {
-    const res = await fetch(`http://localhost:4000/api/likes/Post/${postId}`, {
+    const res = await fetch(`${API_URL}/api/likes/Post/${postId}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -125,7 +126,7 @@ const ProfilePage = () => {
 }
   const fetchComments = async (postId) => {
   try {
-    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
@@ -147,7 +148,7 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -167,7 +168,7 @@ const handleComment = async (postId) => {
 
   const handleChat = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/chats', {
+      const res = await fetch(`${API_URL}/api/chats`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

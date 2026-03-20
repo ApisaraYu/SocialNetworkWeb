@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import API_URL from '../../services/api'
 import { useSocket } from '../../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 
@@ -16,7 +17,7 @@ const Navbar = () => {
   // ดึงจำนวนคำขอเพื่อน
   const fetchFriendRequestCount = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/users/friend-requests', {
+      const res = await fetch(`${API_URL}/api/users/friend-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -51,7 +52,7 @@ const Navbar = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/api/users/search?q=${value}`, {
+      const res = await fetch(`${API_URL}/api/users/search?q=${value}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()

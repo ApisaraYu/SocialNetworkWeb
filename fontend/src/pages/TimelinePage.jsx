@@ -1,3 +1,4 @@
+import API_URL from '../services/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
@@ -19,7 +20,7 @@ const TimelinePage = () => {
   const fetchPosts = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:4000/api/posts/timeline', {
+      const res = await fetch(`${API_URL}/api/posts/timeline`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -51,7 +52,7 @@ const TimelinePage = () => {
       if (content) formData.append('content', content)
       if (file) formData.append('media', file)
 
-      const res = await fetch('http://localhost:4000/api/posts', {
+      const res = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -72,7 +73,7 @@ const TimelinePage = () => {
 
   const handleDelete = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:4000/api/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/api/posts/${postId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -83,7 +84,7 @@ const TimelinePage = () => {
   }
   const handleLike = async (postId) => {
   try {
-    const res = await fetch(`http://localhost:4000/api/likes/Post/${postId}`, {
+    const res = await fetch(`${API_URL}/api/likes/Post/${postId}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -95,7 +96,7 @@ const TimelinePage = () => {
 
 const fetchComments = async (postId) => {
   try {
-    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
@@ -117,7 +118,7 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    const res = await fetch(`http://localhost:4000/api/posts/${postId}/comments`, {
+    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

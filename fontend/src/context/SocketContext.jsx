@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import API_URL from '../services/api'
 import { io } from 'socket.io-client'
 
 const SocketContext = createContext(null)
@@ -27,7 +28,7 @@ export const SocketProvider = ({ children }) => {
       return
     }
 
-    const s = io('http://localhost:4000', {
+    const s = io(`${API_URL}`, {
       auth: { token },
     })
 
