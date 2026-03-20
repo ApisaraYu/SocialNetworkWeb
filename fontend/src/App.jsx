@@ -11,6 +11,8 @@ import ProfilePage from './pages/ProfilePage'
 import FriendRequestsPage from './pages/FriendRequestsPage'
 import EditProfilePage from './pages/EditProfilePage'
 import ChatPage from './pages/ChatPage'
+import GroupPage from './pages/GroupPage'
+import GroupDetailPage from './pages/GroupDetailPage'
 import NotFoundPage from './pages/NotfoundPage'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
@@ -30,6 +32,8 @@ function App() {
         <Route path="/friend-requests" element={<ProtectedRoute><FriendRequestsPage /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        <Route path="/groups" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
+        <Route path="/groups/:groupId" element={<ProtectedRoute><GroupDetailPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </SocketProvider>

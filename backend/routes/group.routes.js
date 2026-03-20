@@ -3,13 +3,19 @@ import {
   createGroup,
   getGroup,
   updateGroup,
+  updateGroupAvatar,
+  updateGroupCover,
   deleteGroup,
   joinGroup,
   respondJoinRequest,
   leaveGroup,
   getGroupPosts,
   createGroupPost,
+  getGroupPostComments,
+  createGroupPostComment,
   deleteGroupPost,
+  getMyGroups,
+  searchGroups
 } from '../controllers/group.controller.js'
 import { protect, isVerified } from '../middleware/auth.middleware.js'
 import { uploadSingle, uploadMultiple } from '../middleware/upload.middleware.js'
@@ -23,8 +29,20 @@ router.use(protect, isVerified)
 // POST /api/groups
 router.post('/', createGroup)
 
+router.get('/my', getMyGroups)
+
+router.get('/search', searchGroups)
+
 // GET /api/groups/:groupId
 router.get('/:groupId', getGroup)
+
+router.put('/:groupId/avatar', uploadSingle('avatar'), updateGroupAvatar)
+
+router.put('/:groupId/cover', uploadSingle('coverPhoto'), updateGroupCover)
+
+router.get('/:groupId/posts/:postId/comments', getGroupPostComments)
+
+router.post('/:groupId/posts/:postId/comments', createGroupPostComment)
 
 // PUT /api/groups/:groupId
 router.put('/:groupId', updateGroup)

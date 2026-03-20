@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSocket } from '../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
 
 const ChatPage = () => {
+  const { socket } = useSocket()
   const navigate = useNavigate()
   const [conversations, setConversations] = useState([])
   const [selectedConv, setSelectedConv] = useState(null)
@@ -53,10 +55,26 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  useEffect(() => {
+  if (!socket) return
+
+  socket.on('new_message', (message) => {
+    if (message.conversation === selectedConv?._id) {
+      setMessages((prev) => [...prev, message])
+    }
+    fetchConversations()
+  })
+
+  return () => socket.off('new_message')
+  }, [socket, selectedConv])
+
   const handleSelectConv = async (conv) => {
     setSelectedConv(conv)
     await fetchMessages(conv._id)
     // mark as read
+    if (socket) {
+      socket.emit('join_room', conv._id)
+    }
     await fetch(`http://localhost:4000/api/chats/${conv._id}/read`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },

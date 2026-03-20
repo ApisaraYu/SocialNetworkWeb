@@ -1,5 +1,7 @@
 import Group from '../models/Group.js'
 import GroupPost from '../models/GroupPost.js'
+import Like from '../models/Like.js'
+import Comment from '../models/Comment.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
 import { deleteFiles, deleteFile } from '../services/upload.service.js'
 
@@ -34,6 +36,7 @@ export const getGroup = async (req, res, next) => {
     const group = await Group.findById(req.params.groupId)
       .populate('creator', 'username avatar')
       .populate('members.user', 'username avatar')
+      .populate('joinRequests.user', 'username avatar')
 
     if (!group) return errorResponse(res, 404, 'ไม่พบกลุ่ม')
 
@@ -68,6 +71,49 @@ export const updateGroup = async (req, res, next) => {
   }
 }
 
+// อัปเดตรูปของกลุ่ม
+export const updateGroupAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) return errorResponse(res, 400, 'กรุณาเลือกรูปภาพ')
+    const group = await Group.findById(req.params.groupId)
+    if (!group) return errorResponse(res, 404, 'ไม่พบกลุ่ม')
+
+    const isAdmin = group.members.some(
+      (m) => m.user.toString() === req.user.id && m.role === 'admin'
+    )
+    if (!isAdmin) return errorResponse(res, 403, 'ไม่มีสิทธิ์')
+
+    if (group.avatar?.key) await deleteFile(group.avatar.key)
+    group.avatar = { url: req.file.path, key: req.file.filename }
+    await group.save()
+
+    return successResponse(res, 200, 'อัปโหลดรูปสำเร็จ', group)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updateGroupCover = async (req, res, next) => {
+  try {
+    if (!req.file) return errorResponse(res, 400, 'กรุณาเลือกรูปภาพ')
+    const group = await Group.findById(req.params.groupId)
+    if (!group) return errorResponse(res, 404, 'ไม่พบกลุ่ม')
+
+    const isAdmin = group.members.some(
+      (m) => m.user.toString() === req.user.id && m.role === 'admin'
+    )
+    if (!isAdmin) return errorResponse(res, 403, 'ไม่มีสิทธิ์')
+
+    if (group.coverPhoto?.key) await deleteFile(group.coverPhoto.key)
+    group.coverPhoto = { url: req.file.path, key: req.file.filename }
+    await group.save()
+
+    return successResponse(res, 200, 'อัปโหลดรูปสำเร็จ', group)
+  } catch (error) {
+    next(error)
+  }
+}
+
 // ============ ลบกลุ่ม ============
 export const deleteGroup = async (req, res, next) => {
   try {
@@ -79,7 +125,7 @@ export const deleteGroup = async (req, res, next) => {
       return errorResponse(res, 403, 'ไม่มีสิทธิ์ลบกลุ่มนี้')
     }
 
-    // ลบรูปกลุ่มออกจาก S3
+    // ลบรูปกลุ่มออก
     if (group.avatar.key) await deleteFile(group.avatar.key)
     if (group.coverPhoto.key) await deleteFile(group.coverPhoto.key)
 
@@ -203,11 +249,20 @@ export const getGroupPosts = async (req, res, next) => {
     const group = await Group.findById(req.params.groupId)
     if (!group) return errorResponse(res, 404, 'ไม่พบกลุ่ม')
 
-    // ตรวจสอบว่าเป็นสมาชิกไหม
     const isMember = group.members.some(
       (m) => m.user.toString() === req.user.id
     )
-    if (!isMember) return errorResponse(res, 403, 'กรุณาเข้าร่วมกลุ่มก่อน')
+
+    // กลุ่ม private และไม่ใช่สมาชิก → ดูไม่ได้
+    if (!isMember && group.privacy === 'private') {
+      return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', {
+        posts: [],
+        isMember: false,
+        currentPage: 1,
+        totalPages: 0,
+        totalPosts: 0,
+      })
+    }
 
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
@@ -222,13 +277,27 @@ export const getGroupPosts = async (req, res, next) => {
       .limit(limit)
       .populate('author', 'username avatar')
 
+      const postsWithLiked = await Promise.all(
+      posts.map(async (post) => {
+        const postObj = post.toObject()
+        const liked = await Like.findOne({
+          user: req.user.id,
+          targetId: post._id,
+          targetType: 'GroupPost',
+        })
+        postObj.isLiked = !!liked
+        return postObj
+      })
+    )
+
     const total = await GroupPost.countDocuments({
       group: req.params.groupId,
       status: 'approved',
     })
 
     return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', {
-      posts,
+      posts: postsWithLiked,
+      isMember, // ← true หรือ false ตามจริง
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalPosts: total,
@@ -261,31 +330,65 @@ export const createGroupPost = async (req, res, next) => {
       type: file.mimetype.startsWith('image/') ? 'image' : 'video',
     })) || []
 
-    // กลุ่ม private → โพสต์ต้องรอ admin อนุมัติ
-    const isAdmin = group.members.some(
-      (m) => m.user.toString() === req.user.id && m.role === 'admin'
-    )
-    const status = group.privacy === 'private' && !isAdmin ? 'pending' : 'approved'
-
     const post = await GroupPost.create({
       group: req.params.groupId,
       author: req.user.id,
       content,
       media,
-      status,
+      status: 'approved',
     })
 
-    if (status === 'approved') {
-      group.postsCount += 1
-      await group.save()
+  group.postsCount += 1
+  await group.save()
+
+  await post.populate('author', 'username avatar')
+
+  return successResponse(res, 201, 'สร้างโพสต์สำเร็จ', post)  
+
+    } catch (error) {
+      next(error)
     }
+  }
 
-    await post.populate('author', 'username avatar')
+// ============ ดึงคอมเมนต์ของ GroupPost ============
+export const getGroupPostComments = async (req, res, next) => {
+  try {
+    const comments = await Comment.find({
+      post: req.params.postId,
+      parentComment: null,
+    })
+      .sort({ createdAt: 1 })
+      .populate('author', 'username avatar')
 
-    return successResponse(res, 201,
-      status === 'pending' ? 'ส่งโพสต์เพื่อรอ admin อนุมัติ' : 'สร้างโพสต์สำเร็จ',
-      post
-    )
+    return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', { comments })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// ============ สร้างคอมเมนต์ใน GroupPost ============
+export const createGroupPostComment = async (req, res, next) => {
+  try {
+    const { content } = req.body
+    if (!content) return errorResponse(res, 400, 'กรุณากรอกข้อความคอมเมนต์')
+
+    const post = await GroupPost.findById(req.params.postId)
+    if (!post) return errorResponse(res, 404, 'ไม่พบโพสต์')
+
+    const comment = await Comment.create({
+      post: req.params.postId,
+      author: req.user.id,
+      content,
+      parentComment: null,
+    })
+
+    await GroupPost.findByIdAndUpdate(req.params.postId, {
+      $inc: { commentsCount: 1 }
+    })
+
+    await comment.populate('author', 'username avatar')
+
+    return successResponse(res, 201, 'คอมเมนต์สำเร็จ', comment)
   } catch (error) {
     next(error)
   }
@@ -310,7 +413,7 @@ export const deleteGroupPost = async (req, res, next) => {
       return errorResponse(res, 403, 'ไม่มีสิทธิ์ลบโพสต์นี้')
     }
 
-    // ลบไฟล์ใน S3
+    // ลบไฟล์
     if (post.media.length > 0) {
       await deleteFiles(post.media.map((m) => m.key))
     }
@@ -321,6 +424,34 @@ export const deleteGroupPost = async (req, res, next) => {
     await group.save()
 
     return successResponse(res, 200, 'ลบโพสต์สำเร็จ')
+  } catch (error) {
+    next(error)
+  }
+}
+// ดึงกลุ่มที่ตัวเองเข้าร่วม
+export const getMyGroups = async (req, res, next) => {
+  try {
+    const groups = await Group.find({
+      'members.user': req.user.id,
+    }).select('name description privacy avatar coverPhoto membersCount')
+
+    return successResponse(res, 200, 'ดึงข้อมูลสำเร็จ', groups)
+  } catch (error) {
+    next(error)
+  }
+}
+
+// ค้นหากลุ่ม
+export const searchGroups = async (req, res, next) => {
+  try {
+    const { q } = req.query
+    if (!q) return errorResponse(res, 400, 'กรุณากรอกคำค้นหา')
+
+    const groups = await Group.find({
+      name: { $regex: q, $options: 'i' },
+    }).select('name description privacy avatar coverPhoto membersCount')
+
+    return successResponse(res, 200, 'ค้นหาสำเร็จ', groups)
   } catch (error) {
     next(error)
   }

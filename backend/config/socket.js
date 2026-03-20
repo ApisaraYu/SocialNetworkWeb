@@ -28,9 +28,13 @@ const initSocket = (server) => {
 
   io.on('connection', (socket) => {
     console.log('User connected:', socket.userId)
-
     // join room ของตัวเอง เพื่อรับข้อความ
     socket.join(socket.userId)
+
+    socket.on('join_room', (roomId) => {
+    socket.join(roomId)
+    console.log(`User ${socket.userId} joined room ${roomId}`)
+  })
 
     socket.on('disconnect', () => {
       console.log('User disconnected:', socket.userId)
