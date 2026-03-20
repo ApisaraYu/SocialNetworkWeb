@@ -19,6 +19,7 @@ export const SocketProvider = ({ children }) => {
 
     // รับข้อความใหม่
     s.on('new_message', (message) => {
+      console.log('new_message received:', message)  
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
       // ถ้าไม่ใช่ข้อความของตัวเอง เพิ่ม unread
       if (message.sender?._id !== currentUser._id) {
