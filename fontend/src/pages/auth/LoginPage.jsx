@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSocket } from '../../context/SocketContext'
 
 const LoginPage = () => {
   const navigate = useNavigate()
+  const { updateToken } = useSocket()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -31,8 +33,8 @@ const LoginPage = () => {
       }
 
       // เก็บ access token ไว้ใน localStorage
-      localStorage.setItem('accessToken', data.accessToken)
       localStorage.setItem('user', JSON.stringify(data.user))
+      updateToken(data.accessToken)
 
       // ไปหน้า Timeline
       navigate('/timeline')

@@ -139,7 +139,6 @@ export const sendMessage = async (req, res, next) => {
       (p) => p.toString() !== req.user.id
     )
     io.to(receiverId.toString()).emit('new_message', message)
-    io.to(req.params.conversationId).emit('new_message', message)
 
     return successResponse(res, 201, 'ส่งข้อความสำเร็จ', message)
   } catch (error) {

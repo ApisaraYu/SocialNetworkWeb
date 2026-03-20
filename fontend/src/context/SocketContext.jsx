@@ -6,34 +6,49 @@ const SocketContext = createContext(null)
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null)
   const [unreadCount, setUnreadCount] = useState(0)
-  const token = localStorage.getItem('accessToken')
+  const [token, setToken] = useState(localStorage.getItem('accessToken'))
+
+  const updateToken = (newToken) => {
+    if (newToken) {
+      localStorage.setItem('accessToken', newToken)
+    } else {
+      localStorage.removeItem('accessToken')
+    }
+    setToken(newToken)
+    setUnreadCount(0)
+  }
 
   useEffect(() => {
-    if (!token) return
+    if (!token) {
+      if (socket) {
+        socket.disconnect()
+        setSocket(null)
+      }
+      return
+    }
 
     const s = io('http://localhost:4000', {
       auth: { token },
     })
 
-    s.on('connect', () => console.log('Socket connected'))
+    s.on('connect', () => console.log('✅ Socket connected:', s.id))
+    s.on('connect_error', (err) => console.error('❌ Socket error:', err.message))
 
-    // รับข้อความใหม่
     s.on('new_message', (message) => {
-      console.log('new_message received:', message)  
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
-      // ถ้าไม่ใช่ข้อความของตัวเอง เพิ่ม unread
-      if (message.sender?._id !== currentUser._id) {
+      const senderId = message.sender?._id?.toString()
+      const myId = currentUser._id?.toString()
+      if (senderId !== myId) {
         setUnreadCount((prev) => prev + 1)
       }
     })
 
     setSocket(s)
-
     return () => s.disconnect()
   }, [token])
 
   return (
-    <SocketContext.Provider value={{ socket, unreadCount, setUnreadCount }}>
+    <SocketContext.Provider value={{ socket, unreadCount, setUnreadCount, updateToken }}>
       {children}
     </SocketContext.Provider>
   )

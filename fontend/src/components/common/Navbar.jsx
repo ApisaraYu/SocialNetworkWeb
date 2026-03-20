@@ -3,7 +3,7 @@ import { useSocket } from '../../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
-  const { unreadCount, setUnreadCount } = useSocket()
+  const { unreadCount, setUnreadCount, updateToken } = useSocket()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [results, setResults] = useState([])
@@ -36,6 +36,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('user')
+    updateToken(null)
     navigate('/')
   }
 

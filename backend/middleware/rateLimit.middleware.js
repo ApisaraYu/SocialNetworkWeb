@@ -18,7 +18,7 @@ export const generalLimiter = rateLimit({
 // จำกัด 10 requests ต่อ 15 นาที ต่อ IP
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 นาที
-  max: 10,
+  max: process.env.NODE_ENV === 'production' ? 10 : 100,
   message: {
     success: false,
     message: 'พยายาม login มากเกินไป กรุณาลองใหม่ใน 15 นาที',
