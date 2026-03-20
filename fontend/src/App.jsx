@@ -13,7 +13,7 @@ import EditProfilePage from './pages/EditProfilePage'
 import ChatPage from './pages/ChatPage'
 import GroupPage from './pages/GroupPage'
 import GroupDetailPage from './pages/GroupDetailPage'
-import NotFoundPage from './pages/NotfoundPage'
+import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/common/ProtectedRoute'
 
 function App() {
