@@ -56,7 +56,7 @@ app.use(cors({
   credentials: true,
 }))
 
-app.get('/', (req, res) => res.json('API is working.'))
+app.get('/', (req, res) => res.json({ status: 'ok' }))
 
 // Routes สำหรับระบบ Authentication
 app.use('/api/auth', authRouter)
