@@ -2,8 +2,8 @@ import nodemailer from 'nodemailer'
 
 // สร้าง transporter สำหรับส่ง email ผ่าน Gmail
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',  // ← เปลี่ยนจาก service เป็น host
-  port: 465,
+  host: 'smtp.gmail.com', 
+  port: 587,
   secure: true,
   auth: {
     user: process.env.EMAIL_USER,
