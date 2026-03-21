@@ -24,6 +24,7 @@ import errorHandler from './middleware/error.middleware.js'
 dns.setServers(['8.8.8.8', '1.1.1.1'])
 
 const app = express()
+app.set('trust proxy', 1)
 
 const server = http.createServer(app)
 initSocket(server)
