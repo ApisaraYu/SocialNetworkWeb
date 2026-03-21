@@ -2,8 +2,9 @@ import nodemailer from 'nodemailer'
 
 // สร้าง transporter สำหรับส่ง email ผ่าน Gmail
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  family: 4,
+  host: 'smtp.gmail.com',  // ← เปลี่ยนจาก service เป็น host
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // App Password จาก Google
