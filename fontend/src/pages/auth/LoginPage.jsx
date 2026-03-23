@@ -14,25 +14,31 @@ const LoginPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async () => {
-    console.log('กด login แล้ว')
-    setError('')
-    setLoading(true)
-    try {
-      console.log('กำลัง fetch...')
-     const { accessToken, user } = res.data.data  // ✅ ดึงจาก res.data.data
+ const handleSubmit = async () => {
+  console.log('กด login แล้ว')
+  setError('')
+  setLoading(true)
+  try {
+    console.log('กำลัง fetch...')
+    // ✅ เพิ่มบรรทัดนี้ที่หายไป
+    const res = await api.post('/auth/login', {
+      email: form.email,
+      password: form.password,
+    })
 
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('user', JSON.stringify(user))
-      updateToken(accessToken)
-      // ไปหน้า Timeline
-      navigate('/timeline')
-    } catch (err) {
-      setError('ไม่สามารถเชื่อมต่อกับ server ได้')
-    } finally {
-      setLoading(false)
-    }
+    const { accessToken, user } = res.data.data
+
+    localStorage.setItem('accessToken', accessToken)
+    localStorage.setItem('user', JSON.stringify(user))
+    updateToken(accessToken)
+    navigate('/timeline')
+  } catch (err) {
+    // แสดง error จาก server ถ้ามี เช่น "รหัสผ่านไม่ถูกต้อง"
+    setError(err.response?.data?.message || 'ไม่สามารถเชื่อมต่อกับ server ได้')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-[#7C6FF7] flex items-center justify-center px-4">
