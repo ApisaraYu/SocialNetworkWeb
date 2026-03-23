@@ -1,7 +1,6 @@
+import crypto from 'crypto'
 import User from '../models/User.js'
-import { generateOTP, hashOTP, getOTPExpire } from '../utils/generateOTP.js'
 import { sendTokenResponse } from '../utils/generateToken.js'
-import { sendVerifyOTP, sendResetPasswordOTP } from '../services/email.service.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
 
 // ============ ตรวจสอบ password ============
@@ -12,202 +11,129 @@ const validatePassword = (password) => {
   if (!/[0-9]/.test(password)) return 'รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว'
   return null
 }
-// sign up
+
+// ============ sign up ============
 export const register = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body
+    const { username, email, password, securityAnswer } = req.body
+
+    if (!securityAnswer || !securityAnswer.trim()) {
+      return errorResponse(res, 400, 'กรุณาตอบคำถามความปลอดภัย')
+    }
 
     // ตรวจสอบว่า email หรือ username ซ้ำไหม
     const existingUser = await User.findOne({ $or: [{ email }, { username }] })
     if (existingUser) {
-      return errorResponse(res, 400,
+      return errorResponse(
+        res, 400,
         existingUser.email === email ? 'Email นี้ถูกใช้งานแล้ว' : 'Username นี้ถูกใช้งานแล้ว'
       )
     }
+
     // ตรวจสอบ password
     const passwordError = validatePassword(password)
     if (passwordError) return errorResponse(res, 400, passwordError)
-    
-      // สร้าง OTP สำหรับยืนยัน email
-    const otp = generateOTP()
-    const hashedOTP = await hashOTP(otp)
-    const otpExpire = getOTPExpire(10) // หมดอายุใน 10 นาที
 
-    // สร้าง user ใหม่
-    const user = await User.create({
-      username,
-      email,
-      password,
-      verifyOtp: hashedOTP,
-      verifyOtpExpire: otpExpire,
-    })
+    // สร้าง user — securityAnswer จะถูก hash อัตโนมัติใน pre-save hook
+    const user = await User.create({ username, email, password, securityAnswer })
 
-    // ส่ง OTP ไปทาง email
-    await sendVerifyOTP(email, otp)
-
-    return successResponse(res, 201, 'สมัครสมาชิกสำเร็จ กรุณายืนยัน email ของคุณ')
-
+    // สมัครสำเร็จ → ส่ง token กลับเลย (ไม่ต้องยืนยัน email)
+    sendTokenResponse(res, user, 201)
   } catch (error) {
     next(error)
   }
 }
 
-// ยืนยัน Email
-export const verifyEmail = async (req, res, next) => {
-  try {
-    const { email, otp } = req.body
-
-    const user = await User.findOne({ email })
-    if (!user) {
-      return errorResponse(res, 404, 'ไม่พบผู้ใช้งาน')
-    }
-
-    // ตรวจสอบว่า verify แล้วหรือยัง
-    if (user.isVerified) {
-      return errorResponse(res, 400, 'Email นี้ยืนยันแล้ว')
-    }
-
-    // ตรวจสอบ OTP
-    const isValid = await user.verifyOtpCode(otp, 'verify')
-    if (!isValid) {
-      return errorResponse(res, 400, 'OTP ไม่ถูกต้องหรือหมดอายุแล้ว')
-    }
-
-    // อัปเดตสถานะ
-    user.isVerified = true
-    user.verifyOtp = ''
-    user.verifyOtpExpire = null
-    await user.save()
-
-    return successResponse(res, 200, 'ยืนยัน Email สำเร็จ')
-
-  } catch (error) {
-    next(error)
-  }
-}
-
-// ขอ OTP ใหม่
-export const resendOTP = async (req, res, next) => {
-  try {
-    const { email } = req.body
-
-    const user = await User.findOne({ email })
-    if (!user) {
-      return errorResponse(res, 404, 'ไม่พบผู้ใช้งาน')
-    }
-
-    if (user.isVerified) {
-      return errorResponse(res, 400, 'Email นี้ยืนยันแล้ว')
-    }
-
-    // สร้าง OTP ใหม่
-    const otp = generateOTP()
-    user.verifyOtp = await hashOTP(otp)
-    user.verifyOtpExpire = getOTPExpire(10)
-    await user.save()
-
-    await sendVerifyOTP(email, otp)
-
-    return successResponse(res, 200, 'ส่ง OTP ใหม่สำเร็จ กรุณาตรวจสอบ email')
-
-  } catch (error) {
-    next(error)
-  }
-}
-
-// log in
+// ============ log in ============
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
 
-    // ดึง password มาด้วย (select: false ใน model)
     const user = await User.findOne({ email }).select('+password')
-    if (!user) {
-      return errorResponse(res, 401, 'Email หรือรหัสผ่านไม่ถูกต้อง')
-    }
+    if (!user) return errorResponse(res, 401, 'Email หรือรหัสผ่านไม่ถูกต้อง')
 
-    // ตรวจสอบรหัสผ่าน
     const isMatch = await user.comparePassword(password)
-    if (!isMatch) {
-      return errorResponse(res, 401, 'Email หรือรหัสผ่านไม่ถูกต้อง')
-    }
+    if (!isMatch) return errorResponse(res, 401, 'Email หรือรหัสผ่านไม่ถูกต้อง')
 
-    // ตรวจสอบว่า verify email แล้วหรือยัง
-    if (!user.isVerified) {
-      return errorResponse(res, 403, 'กรุณายืนยัน email ก่อนเข้าสู่ระบบ')
-    }
-
-    // ส่ง token กลับไป
     sendTokenResponse(res, user, 200)
-
   } catch (error) {
     next(error)
   }
 }
 
-// log out
+// ============ log out ============
 export const logout = async (req, res, next) => {
   try {
-    // ลบ refreshToken cookie
     res.clearCookie('refreshToken')
     return successResponse(res, 200, 'ออกจากระบบสำเร็จ')
-
   } catch (error) {
     next(error)
   }
 }
 
-// ลืมรหัสผ่าน
+// ============ ลืมรหัสผ่าน — ตรวจสอบด้วย Security Question ============
+// Step 1: รับ email + securityAnswer → ถ้าถูกส่ง resetToken กลับ
 export const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body
+    const { email, securityAnswer } = req.body
 
-    const user = await User.findOne({ email })
-    if (!user) {
-      return errorResponse(res, 404, 'ไม่พบผู้ใช้งาน')
+    if (!email || !securityAnswer) {
+      return errorResponse(res, 400, 'กรุณากรอกอีเมล์และคำตอบให้ครบ')
     }
 
-    // สร้าง OTP สำหรับ reset รหัสผ่าน
-    const otp = generateOTP()
-    user.resetPasswordOtp = await hashOTP(otp)
-    user.resetPasswordOtpExpire = getOTPExpire(10)
+    const user = await User.findOne({ email }).select('+securityAnswer')
+    if (!user) {
+      // ตอบกำกวมเพื่อไม่ให้เดา email ได้
+      return errorResponse(res, 400, 'ข้อมูลไม่ถูกต้อง')
+    }
+
+    const isMatch = await user.compareSecurityAnswer(securityAnswer)
+    if (!isMatch) {
+      return errorResponse(res, 400, 'คำตอบไม่ถูกต้อง')
+    }
+
+    // สร้าง resetToken ชั่วคราว หมดอายุใน 15 นาที
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000
     await user.save()
 
-    await sendResetPasswordOTP(email, otp)
-
-    return successResponse(res, 200, 'ส่ง OTP สำหรับรีเซ็ตรหัสผ่านแล้ว กรุณาตรวจสอบ email')
-
+    return successResponse(res, 200, 'ตอบคำถามถูกต้อง', { resetToken })
   } catch (error) {
     next(error)
   }
 }
 
-// รีเซ็ตรหัส
+// ============ รีเซ็ตรหัสผ่าน ============
+// Step 2: รับ resetToken + newPassword → อัปเดตรหัสผ่าน
 export const resetPassword = async (req, res, next) => {
   try {
-    const { email, otp, newPassword } = req.body
+    const { resetToken, newPassword } = req.body
 
-    const user = await User.findOne({ email })
+    if (!resetToken || !newPassword) {
+      return errorResponse(res, 400, 'ข้อมูลไม่ครบถ้วน')
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    })
+
     if (!user) {
-      return errorResponse(res, 404, 'ไม่พบผู้ใช้งาน')
+      return errorResponse(res, 400, 'Token ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาเริ่มใหม่อีกครั้ง')
     }
 
-    // ตรวจสอบ OTP
-    const isValid = await user.verifyOtpCode(otp, 'reset')
-    if (!isValid) {
-      return errorResponse(res, 400, 'OTP ไม่ถูกต้องหรือหมดอายุแล้ว')
-    }
-
-    // อัปเดตรหัสผ่านใหม่
     const passwordError = validatePassword(newPassword)
     if (passwordError) return errorResponse(res, 400, passwordError)
+
     user.password = newPassword
-    user.resetPasswordOtp = ''
-    user.resetPasswordOtpExpire = null
+    user.resetPasswordToken = ''
+    user.resetPasswordExpire = null
     await user.save()
 
     return successResponse(res, 200, 'รีเซ็ตรหัสผ่านสำเร็จ')
-
   } catch (error) {
     next(error)
   }

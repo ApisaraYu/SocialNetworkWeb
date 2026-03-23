@@ -9,12 +9,14 @@ const validatePassword = (password) => {
   if (!/[0-9]/.test(password)) return 'รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว'
   return null
 }
+
 const RegisterPage = () => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
+    securityAnswer: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,8 +27,14 @@ const RegisterPage = () => {
 
   const handleSubmit = async () => {
     setError('')
+
+    if (!form.securityAnswer.trim()) {
+      return setError('กรุณาตอบคำถามความปลอดภัย')
+    }
+
     const passwordError = validatePassword(form.password)
     if (passwordError) return setError(passwordError)
+
     setLoading(true)
     try {
       const res = await fetch(`${API_URL}/api/auth/register`, {
@@ -41,8 +49,8 @@ const RegisterPage = () => {
         return
       }
 
-      // สมัครสำเร็จ → ไปหน้า verify email
-      navigate('/verify-email', { state: { email: form.email } })
+      // สมัครสำเร็จ → ไปหน้า timeline ได้เลย
+      navigate('/timeline')
     } catch (err) {
       setError('ไม่สามารถเชื่อมต่อกับ server ได้')
     } finally {
@@ -110,6 +118,27 @@ const RegisterPage = () => {
               name="password"
               placeholder="รหัสผ่าน"
               value={form.password}
+              onChange={handleChange}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-gray-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#7C6FF7] transition"
+            />
+          </div>
+
+          {/* Security Question */}
+          <div>
+            <label className="text-sm font-semibold text-[#3D3A8C] mb-1 block">
+              คำถามความปลอดภัย
+            </label>
+            <p className="text-xs text-gray-400 mb-2">
+              ใช้สำหรับยืนยันตัวตนเมื่อลืมรหัสผ่าน
+            </p>
+            <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-500 text-sm mb-2">
+              🍜 คุณชอบอาหารอะไร?
+            </div>
+            <input
+              type="text"
+              name="securityAnswer"
+              placeholder="กรอกคำตอบของคุณ"
+              value={form.securityAnswer}
               onChange={handleChange}
               className="w-full bg-gray-100 rounded-lg px-4 py-3 text-gray-600 placeholder-gray-400 outline-none focus:ring-2 focus:ring-[#7C6FF7] transition"
             />
