@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import API_URL from '../services/api'
+import api from '../services/api'
 import { io } from 'socket.io-client'
 
 const SocketContext = createContext(null)
@@ -28,8 +28,11 @@ export const SocketProvider = ({ children }) => {
       return
     }
 
-    const s = io(`${API_URL}`, {
+    const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
+    const s = io(SOCKET_URL, {
       auth: { token },
+      withCredentials: true,
     })
 
     s.on('connect', () => console.log('✅ Socket connected:', s.id))
