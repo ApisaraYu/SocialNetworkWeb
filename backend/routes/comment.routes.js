@@ -6,14 +6,14 @@ import {
   updateComment,
   deleteComment,
 } from '../controllers/comment.controller.js'
-import { protect, isVerified } from '../middleware/auth.middleware.js'
+import { protect } from '../middleware/auth.middleware.js'
 
 const router = express.Router({ mergeParams: true })
 // mergeParams: true = ทำให้เข้าถึง params จาก parent route ได้
 // เช่น :postId จาก /api/posts/:postId/comments
 
 // ทุก route ต้อง login และ verify email ก่อน
-router.use(protect, isVerified)
+router.use(protect)
 
 // คอมเมนต์
 // GET /api/posts/:postId/comments

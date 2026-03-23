@@ -48,12 +48,5 @@ const protect = async (req, res, next) => {
   }
 }
 
-// ตรวจสอบว่า user ยืนยัน email แล้วหรือยัง
-const isVerified = (req, res, next) => {
-  if (!req.user.isVerified) {
-    return errorResponse(res, 403, 'กรุณายืนยัน email ก่อนใช้งาน')
-  }
-  next()
-}
 
-export { protect, isVerified }
+export { protect }

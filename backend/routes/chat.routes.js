@@ -7,13 +7,13 @@ import {
   deleteMessage,
   markAsRead,
 } from '../controllers/chat.controller.js'
-import { protect, isVerified } from '../middleware/auth.middleware.js'
+import { protect } from '../middleware/auth.middleware.js'
 import { uploadMultiple } from '../middleware/upload.middleware.js'
 
 const router = express.Router()
 
 // ทุก route ต้อง login และ verify email ก่อน
-router.use(protect, isVerified)
+router.use(protect)
 
 // ============ ห้องแชท ============
 // GET /api/chats
