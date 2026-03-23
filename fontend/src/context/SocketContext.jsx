@@ -28,7 +28,7 @@ export const SocketProvider = ({ children }) => {
       return
     }
 
-    const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000'
 
     const s = io(SOCKET_URL, {
       auth: { token },
