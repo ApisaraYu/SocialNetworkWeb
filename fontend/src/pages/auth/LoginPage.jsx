@@ -20,12 +20,11 @@ const LoginPage = () => {
     setLoading(true)
     try {
       console.log('กำลัง fetch...')
-      const res = await api.post('/api/auth/login', form)
+     const { accessToken, user } = res.data.data  // ✅ ดึงจาก res.data.data
 
-      // เก็บ access token ไว้ใน localStorage
-      localStorage.setItem('user', JSON.stringify(data.user))
-      updateToken(data.accessToken)
-
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('user', JSON.stringify(user))
+      updateToken(accessToken)
       // ไปหน้า Timeline
       navigate('/timeline')
     } catch (err) {

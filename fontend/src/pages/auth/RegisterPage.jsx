@@ -41,7 +41,7 @@ const RegisterPage = () => {
       // สมัครสำเร็จ → ไปหน้า timeline ได้เลย
       navigate('/timeline')
     } catch (err) {
-      setError('ไม่สามารถเชื่อมต่อกับ server ได้')
+      setError(err.response?.data?.message || 'ไม่สามารถเชื่อมต่อกับ server ได้')
     } finally {
       setLoading(false)
     }

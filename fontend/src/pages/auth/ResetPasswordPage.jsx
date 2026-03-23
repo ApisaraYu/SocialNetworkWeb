@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import API_URL from '../../services/api'
+import api from '../../services/api'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const validatePassword = (password) => {
@@ -46,12 +46,7 @@ const ResetPasswordPage = () => {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resetToken, newPassword }),
-      })
-      const data = await res.json()
+      await api.post('/api/auth/reset-password', { resetToken, newPassword })
 
       if (!res.ok) {
         setError(data.message || 'เกิดข้อผิดพลาด')
@@ -60,7 +55,7 @@ const ResetPasswordPage = () => {
 
       navigate('/login')
     } catch (err) {
-      setError('ไม่สามารถเชื่อมต่อกับ server ได้')
+      setError(err.response?.data?.message || 'ไม่สามารถเชื่อมต่อกับ server ได้')
     } finally {
       setLoading(false)
     }
