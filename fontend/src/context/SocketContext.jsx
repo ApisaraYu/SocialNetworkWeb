@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import api from '../services/api'
 import { io } from 'socket.io-client'
 
 const SocketContext = createContext(null)
@@ -7,7 +6,12 @@ const SocketContext = createContext(null)
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null)
   const [unreadCount, setUnreadCount] = useState(0)
-  const [token, setToken] = useState(localStorage.getItem('accessToken'))
+
+  // ✅ กัน "null" string
+  const [token, setToken] = useState(() => {
+    const t = localStorage.getItem('accessToken')
+    return t && t !== 'null' && t !== 'undefined' ? t : null
+  })
 
   const updateToken = (newToken) => {
     if (newToken) {
@@ -15,11 +19,12 @@ export const SocketProvider = ({ children }) => {
     } else {
       localStorage.removeItem('accessToken')
     }
-    setToken(newToken)
+    setToken(newToken || null)
     setUnreadCount(0)
   }
 
   useEffect(() => {
+    // ✅ ถ้าไม่มี token → ไม่ connect เลย
     if (!token) {
       if (socket) {
         socket.disconnect()
@@ -28,6 +33,7 @@ export const SocketProvider = ({ children }) => {
       return
     }
 
+    // ✅ ใช้ VITE_SOCKET_URL แยกต่างหาก
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000'
 
     const s = io(SOCKET_URL, {
