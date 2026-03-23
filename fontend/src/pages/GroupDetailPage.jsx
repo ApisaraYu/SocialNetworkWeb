@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import API_URL from '../services/api'
+import api from '../services/api'
 import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
 
@@ -31,45 +31,34 @@ const GroupDetailPage = () => {
 
   // ดึงข้อมูลกลุ่ม
   const fetchGroup = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setGroup(data.data)
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await api.get(`/api/groups/${groupId}`)
+    setGroup(res.data.data)
+  } catch (err) {
+    console.error(err)
   }
+}
 
-  // ดึงโพสต์ในกลุ่ม
-  const fetchPosts = async () => {
+const fetchPosts = async () => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}/posts`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        if (res.ok) {
-            setPosts(data.data.posts || [])
-            setIsMemberFromApi(data.data.isMember)
-        }
-    } catch (err) {
-        console.error(err)
-    } finally {
-        setLoading(false)
-    }
+    const res = await api.get(`/api/groups/${groupId}/posts`)
+    setPosts(res.data.data.posts || [])
+    setIsMemberFromApi(res.data.data.isMember)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
-  const fetchPendingRequests = async () => {
+}
+
+const fetchPendingRequests = async () => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        if (res.ok) setPendingRequests(data.data.joinRequests || [])
-    } catch (err) {
-        console.error(err)
-    }
+    const res = await api.get(`/api/groups/${groupId}`)
+    setPendingRequests(res.data.data.joinRequests || [])
+  } catch (err) {
+    console.error(err)
   }
+}
 
   const isMember = group?.members?.some((m) => m.user?._id === currentUser._id)
   const isAdmin = group?.members?.some((m) => m.user?._id === currentUser._id && m.role === 'admin')
@@ -91,238 +80,167 @@ const GroupDetailPage = () => {
   // เข้าร่วมกลุ่ม
   const handleJoin = async () => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}/join`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        if (res.ok) {
-            if (group.privacy === 'private') {
-                setJoinRequested(true) // กลุ่ม private → รอ admin อนุมัติ
-            } else {
-                fetchGroup()
-                fetchPosts()
-            }
-        }
-    } catch (err) {
-        console.error(err)
+    await api.post(`/api/groups/${groupId}/join`)
+    if (group.privacy === 'private') {
+      setJoinRequested(true)
+    } else {
+      fetchGroup()
+      fetchPosts()
     }
+  } catch (err) {
+    console.error(err)
   }
-  // admin อนุมัติเข้ากลุ่ม
-  const handleApprove = async (userId, action) => {
+}
+
+const handleApprove = async (userId, action) => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}/join-request`, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, action }),
-        })
-        if (res.ok) {
-            fetchGroup()
-            fetchPendingRequests()
-        }
-    } catch (err) {
-        console.error(err)
-    }
+    await api.put(`/api/groups/${groupId}/join-request`, { userId, action })
+    fetchGroup()
+    fetchPendingRequests()
+  } catch (err) {
+    console.error(err)
   }
+}
 
-  // ออกจากกลุ่ม
-  const handleLeave = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/groups/${groupId}/leave`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) {
-        setShowLeaveModal(false)
-        navigate('/groups')
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const handleDelete = async () => {
+const handleLeave = async () => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-        })
-        if (res.ok) {
-            setShowDeleteModal(false)
-            navigate('/groups')
-        }
-    } catch (err) {
-        console.error(err)
-    }
+    await api.delete(`/api/groups/${groupId}/leave`)
+    setShowLeaveModal(false)
+    navigate('/groups')
+  } catch (err) {
+    console.error(err)
   }
+}
 
-  // ฟังก์ชั่นแก้ไขกลุ่ม
-  const handleEdit = async () => {
+ const handleDelete = async () => {
+  try {
+    await api.delete(`/api/groups/${groupId}`)
+    setShowDeleteModal(false)
+    navigate('/groups')
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const handleEdit = async () => {
   if (!editForm.name) return
   try {
-    const res = await fetch(`${API_URL}/api/groups/${groupId}`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
-        body: JSON.stringify(editForm),
-        })
-        if (res.ok) {
-            setShowEditModal(false)
-        fetchGroup()
-        }
-    } catch (err) {
-        console.error(err)
-    }
+    await api.put(`/api/groups/${groupId}`, editForm)
+    setShowEditModal(false)
+    fetchGroup()
+  } catch (err) {
+    console.error(err)
   }
-  const handleAvatarChange = async (e) => {
+}
+
+const handleAvatarChange = async (e) => {
   const file = e.target.files[0]
   if (!file) return
   try {
     const formData = new FormData()
     formData.append('avatar', file)
-    const res = await fetch(`${API_URL}/api/groups/${groupId}/avatar`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    })
-    if (res.ok) fetchGroup()
-   } catch (err) {
+    await api.put(`/api/groups/${groupId}/avatar`, formData)
+    fetchGroup()
+  } catch (err) {
     console.error(err)
-   }
   }
+}
 
-  const handleCoverChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    try {
-        const formData = new FormData()
-        formData.append('coverPhoto', file)
-        const res = await fetch(`${API_URL}/api/groups/${groupId}/cover`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-        })
-        if (res.ok) fetchGroup()
-    } catch (err) {
-        console.error(err)
-    }
-   }
+const handleCoverChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  try {
+    const formData = new FormData()
+    formData.append('coverPhoto', file)
+    await api.put(`/api/groups/${groupId}/cover`, formData)
+    fetchGroup()
+  } catch (err) {
+    console.error(err)
+  }
+}
 
   // สร้างโพสต์
   const handlePost = async () => {
-    if (!content && !file) return
-    setPosting(true)
-    try {
-      const formData = new FormData()
-      if (content) formData.append('content', content)
-      if (file) formData.append('media', file)
-
-      const res = await fetch(`${API_URL}/api/groups/${groupId}/posts`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
-      if (res.ok) {
-        setContent('')
-        setFile(null)
-        setPreview(null)
-        fetchPosts()
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setPosting(false)
-    }
-  }
-  const handleLike = async (postId) => {
+  if (!content && !file) return
+  setPosting(true)
   try {
-        const res = await fetch(`${API_URL}/api/likes/GroupPost/${postId}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        console.log('full response:', data)
-        if (res.ok) {
-        // update state ทันที ไม่ต้อง fetch ใหม่
-            setPosts((prev) =>
-            prev.map((p) =>
-            p._id === postId
-                ? {
-                    ...p,
-                    isLiked: data.data.liked,
-                    likesCount: data.data.liked
-                    ? (p.likesCount || 0) + 1
-                    : Math.max(0, (p.likesCount || 0) - 1),
-                }
-                : p
-            )
-          )
-        }
-    } catch (err) {
-        console.error(err)
-    }
+    const formData = new FormData()
+    if (content) formData.append('content', content)
+    if (file) formData.append('media', file)
+    await api.post(`/api/groups/${groupId}/posts`, formData)
+    setContent('')
+    setFile(null)
+    setPreview(null)
+    fetchPosts()
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setPosting(false)
   }
+}
 
-  const fetchComments = async (postId) => {
+const handleLike = async (postId) => {
   try {
-        const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}/comments`, {
-      headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        if (res.ok) {
-        setComments((prev) => ({ ...prev, [postId]: data.data.comments }))
-        }
-    } catch (err) {
-        console.error(err)
-    }
-  }
-
-  const toggleComments = (postId) => {
-        const isOpen = openComments[postId]
-        setOpenComments((prev) => ({ ...prev, [postId]: !isOpen }))
-        if (!isOpen) fetchComments(postId)
-    }
-
-  const handleComment = async (postId) => {
-        const text = commentText[postId]?.trim()
-        if (!text) return
-        try {
-            const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}/comments`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ content: text }),
-            })
-            if (res.ok) {
-            setCommentText((prev) => ({ ...prev, [postId]: '' }))
-            fetchComments(postId)
-            setPosts((prev)=>
-                prev.map((p)=>
-                    p._id === postId ? {...p, commentsCount:(p.commentsCount || 0) + 1} : p
-                )
-            )
+    const res = await api.post(`/api/likes/GroupPost/${postId}`)
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId
+          ? {
+              ...p,
+              isLiked: res.data.data.liked,
+              likesCount: res.data.data.liked
+                ? (p.likesCount || 0) + 1
+                : Math.max(0, (p.likesCount || 0) - 1),
             }
-        } catch (err) {
-            console.error(err)
-        }
-    }
+          : p
+      )
+    )
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const fetchComments = async (postId) => {
+  try {
+    const res = await api.get(`/api/groups/${groupId}/posts/${postId}/comments`)
+    setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const toggleComments = (postId) => {
+  const isOpen = openComments[postId]
+  setOpenComments((prev) => ({ ...prev, [postId]: !isOpen }))
+  if (!isOpen) fetchComments(postId)
+}
+
+const handleComment = async (postId) => {
+  const text = commentText[postId]?.trim()
+  if (!text) return
+  try {
+    await api.post(`/api/groups/${groupId}/posts/${postId}/comments`, { content: text })
+    setCommentText((prev) => ({ ...prev, [postId]: '' }))
+    fetchComments(postId)
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId ? { ...p, commentsCount: (p.commentsCount || 0) + 1 } : p
+      )
+    )
+  } catch (err) {
+    console.error(err)
+  }
+}
 
   // ลบโพสต์
-  const handleDeletePost = async (postId) => {
-    try {
-      const res = await fetch(`${API_URL}/api/groups/${groupId}/posts/${postId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) fetchPosts()
-    } catch (err) {
-      console.error(err)
-    }
+ const handleDeletePost = async (postId) => {
+  try {
+    await api.delete(`/api/groups/${groupId}/posts/${postId}`)
+    fetchPosts()
+  } catch (err) {
+    console.error(err)
   }
+}
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0]

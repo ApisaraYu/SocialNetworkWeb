@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSocket } from '../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../services/api'
+import api from '../services/api'
 import Layout from '../components/common/Layout'
 
 const ChatPage = () => {
@@ -21,32 +21,25 @@ const ChatPage = () => {
 
   // ดึงรายการแชท
   const fetchConversations = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/chats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setConversations(data.data || [])
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await api.get('/api/chats')
+    setConversations(res.data.data || [])
+  } catch (err) {
+    console.error(err)
   }
+}
 
-  // ดึงข้อความในแชท
-  const fetchMessages = async (convId) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/chats/${convId}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setMessages(data.data.messages || [])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+const fetchMessages = async (convId) => {
+  setLoading(true)
+  try {
+    const res = await api.get(`/api/chats/${convId}/messages`)
+    setMessages(res.data.data.messages || [])
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
+}
 
   useEffect(() => {
     fetchConversations()
@@ -70,17 +63,13 @@ const ChatPage = () => {
   }, [socket, selectedConv])
 
   const handleSelectConv = async (conv) => {
-    setSelectedConv(conv)
-    await fetchMessages(conv._id)
-    // mark as read
-    if (socket) {
-      socket.emit('join_room', conv._id)
-    }
-    await fetch(`${API_URL}/api/chats/${conv._id}/read`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-    })
+  setSelectedConv(conv)
+  await fetchMessages(conv._id)
+  if (socket) {
+    socket.emit('join_room', conv._id)
   }
+  await api.put(`/api/chats/${conv._id}/read`)
+}
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0]
@@ -91,29 +80,21 @@ const ChatPage = () => {
   }
 
   const handleSend = async () => {
-    if (!text.trim() && !file) return
-    try {
-      const formData = new FormData()
-      if (text.trim()) formData.append('content', text)
-      if (file) formData.append('media', file)
-
-      const res = await fetch(`${API_URL}/api/chats/${selectedConv._id}/messages`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
-
-      if (res.ok) {
-        setText('')
-        setFile(null)
-        setPreview(null)
-        fetchMessages(selectedConv._id)
-        fetchConversations()
-      }
-    } catch (err) {
-      console.error(err)
-    }
+  if (!text.trim() && !file) return
+  try {
+    const formData = new FormData()
+    if (text.trim()) formData.append('content', text)
+    if (file) formData.append('media', file)
+    await api.post(`/api/chats/${selectedConv._id}/messages`, formData)
+    setText('')
+    setFile(null)
+    setPreview(null)
+    fetchMessages(selectedConv._id)
+    fetchConversations()
+  } catch (err) {
+    console.error(err)
   }
+}
 
   // หาคู่สนทนา (ไม่ใช่ตัวเอง)
   const getPartner = (conv) => {

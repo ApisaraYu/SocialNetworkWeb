@@ -1,4 +1,4 @@
-import API_URL from '../services/api'
+import api from '../services/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
@@ -15,22 +15,17 @@ const TimelinePage = () => {
   const [comments, setComments] = useState({}) // เก็บ comment ของแต่ละโพสต์
   const [commentText, setCommentText] = useState({}) // เก็บข้อความที่กำลังพิมพ์
 
-  const token = localStorage.getItem('accessToken')
-
   const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/posts/timeline`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setPosts(data.data.posts)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+  setLoading(true)
+  try {
+    const res = await api.get('/api/posts/timeline')
+    setPosts(res.data.data.posts)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
+}
 
   useEffect(() => {
     fetchPosts()
@@ -72,23 +67,17 @@ const TimelinePage = () => {
   }
 
   const handleDelete = async (postId) => {
-    try {
-      const res = await fetch(`${API_URL}/api/posts/${postId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) fetchPosts()
-    } catch (err) {
-      console.error(err)
-    }
-  }
-  const handleLike = async (postId) => {
   try {
-    const res = await fetch(`${API_URL}/api/likes/Post/${postId}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    if (res.ok) fetchPosts() // refresh โพสต์ใหม่
+    await api.delete(`/api/posts/${postId}`)
+    fetchPosts()
+  } catch (err) {
+    console.error(err)
+  }
+}
+ const handleLike = async (postId) => {
+  try {
+    await api.post(`/api/likes/Post/${postId}`)
+    fetchPosts()
   } catch (err) {
     console.error(err)
   }
@@ -96,13 +85,8 @@ const TimelinePage = () => {
 
 const fetchComments = async (postId) => {
   try {
-    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setComments((prev) => ({ ...prev, [postId]: data.data.comments }))
-    }
+    const res = await api.get(`/api/posts/${postId}/comments`)
+    setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
   } catch (err) {
     console.error(err)
   }
@@ -118,25 +102,16 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content: text }),
-    })
-    if (res.ok) {
-      setCommentText((prev) => ({ ...prev, [postId]: '' }))
-      fetchComments(postId)
-      fetchPosts()
-    }
+    await api.post(`/api/posts/${postId}/comments`, { content: text })
+    setCommentText((prev) => ({ ...prev, [postId]: '' }))
+    fetchComments(postId)
+    fetchPosts()
   } catch (err) {
     console.error(err)
   }
 }
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+const user = JSON.parse(localStorage.getItem('user') || '{}')
 
   return (
     <Layout>

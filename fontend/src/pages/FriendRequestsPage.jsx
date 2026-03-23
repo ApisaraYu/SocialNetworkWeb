@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../services/api'
+import api from '../services/api'
 import Layout from '../components/common/Layout'
 
 const FriendRequestsPage = () => {
@@ -10,39 +10,28 @@ const FriendRequestsPage = () => {
   const token = localStorage.getItem('accessToken')
 
   const fetchRequests = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/friend-requests`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setRequests(data.data || [])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+  try {
+    const res = await api.get('/api/users/friend-requests')
+    setRequests(res.data.data || [])
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
+}
 
   useEffect(() => {
     fetchRequests()
   }, [])
 
   const handleRespond = async (userId, action) => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/friend-request/respond`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fromUserId: userId, action }),
-      })
-      if (res.ok) fetchRequests()
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    await api.put('/api/users/friend-request/respond', { fromUserId: userId, action })
+    fetchRequests()
+  } catch (err) {
+    console.error(err)
   }
-
+}
   return (
     <Layout>
       <div className="flex flex-col gap-4">

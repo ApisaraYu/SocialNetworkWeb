@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../services/api'
+import api from '../services/api'
 import Layout from '../components/common/Layout'
 
 const GroupPage = () => {
@@ -22,77 +22,51 @@ const GroupPage = () => {
 
   // ดึงกลุ่มที่เข้าร่วม
   const fetchMyGroups = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/groups/my`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setMyGroups(data.data || [])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+  setLoading(true)
+  try {
+    const res = await api.get('/api/groups/my')
+    setMyGroups(res.data.data || [])
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
+}
 
   // ค้นหากลุ่ม
   const handleSearch = async (e) => {
-    const value = e.target.value
-    setSearch(value)
-    if (!value.trim()) {
-      setSearchResults([])
-      return
-    }
-    try {
-      const res = await fetch(`${API_URL}/api/groups/search?q=${value}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setSearchResults(data.data || [])
-    } catch (err) {
-      console.error(err)
-    }
+  const value = e.target.value
+  setSearch(value)
+  if (!value.trim()) {
+    setSearchResults([])
+    return
   }
+  try {
+    const res = await api.get(`/api/groups/search?q=${value}`)
+    setSearchResults(res.data.data || [])
+  } catch (err) {
+    console.error(err)
+  }
+}
 
-  // สร้างกลุ่ม
-  const handleCreate = async () => {
+const handleCreate = async () => {
   if (!createForm.name) return
   try {
-    // สร้างกลุ่มก่อน
-    const res = await fetch(`${API_URL}/api/groups`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(createForm),
-    })
-    const data = await res.json()
-    if (!res.ok) return
-
-    const groupId = data.data._id
+    const res = await api.post('/api/groups', createForm)
+    const groupId = res.data.data._id
 
     // อัปโหลด avatar ถ้ามี
     if (avatarFile) {
       const formData = new FormData()
       formData.append('avatar', avatarFile)
-      await fetch(`${API_URL}/api/groups/${groupId}/avatar`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
+      await api.put(`/api/groups/${groupId}/avatar`, formData)
     }
 
     // อัปโหลด cover ถ้ามี
     if (coverFile) {
       const formData = new FormData()
       formData.append('coverPhoto', coverFile)
-      await fetch(`${API_URL}/api/groups/${groupId}/cover`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
+      await api.put(`/api/groups/${groupId}/cover`, formData)
     }
 
     setShowCreate(false)

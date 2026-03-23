@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/common/Layout'
-import API_URL from '../services/api'
+import api from '../services/api'
 
 const ProfilePage = () => {
   const { id } = useParams()
@@ -25,57 +25,45 @@ const ProfilePage = () => {
 
   // ดึงข้อมูล profile
   const fetchProfile = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setProfile(data.data)
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await api.get(`/api/users/${userId}`)
+    setProfile(res.data.data)
+  } catch (err) {
+    console.error(err)
   }
+}
 
   // ดึงโพสต์ของ user
   const fetchPosts = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/posts/user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setPosts(data.data.posts)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+  try {
+    const res = await api.get(`/api/posts/user/${userId}`)
+    setPosts(res.data.data.posts)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
   }
+}
 
   // ดึงรายชื่อเพื่อน
   const fetchFriends = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/${userId}/friends`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setFriends(data.data || [])
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await api.get(`/api/users/${userId}/friends`)
+    setFriends(res.data.data || [])
+  } catch (err) {
+    console.error(err)
   }
+}
 
   // เช็คสถานะเพื่อน
   const fetchFriendStatus = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/${userId}/friend-status`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setFriendStatus(data.data.status)
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await api.get(`/api/users/${userId}/friend-status`)
+    setFriendStatus(res.data.data.status)
+  } catch (err) {
+    console.error(err)
   }
+}
 
   useEffect(() => {
     fetchProfile()
@@ -86,53 +74,38 @@ const ProfilePage = () => {
 
   // ส่งคำขอเพื่อน
   const handleFriendRequest = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/${userId}/friend-request`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) setFriendStatus('pending') // อัปเดต state ทันที
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  // ลบเพื่อน
-  const handleRemoveFriend = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/users/${userId}/friend`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) {
-        setFriendStatus('none')
-        fetchFriends()
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const handleLike = async (postId) => {
   try {
-    const res = await fetch(`${API_URL}/api/likes/Post/${postId}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    if (res.ok) fetchPosts()
+    await api.post(`/api/users/${userId}/friend-request`)
+    setFriendStatus('pending')
   } catch (err) {
     console.error(err)
   }
 }
-  const fetchComments = async (postId) => {
+
+  // ลบเพื่อน
+  const handleRemoveFriend = async () => {
   try {
-    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setComments((prev) => ({ ...prev, [postId]: data.data.comments }))
-    }
+    await api.delete(`/api/users/${userId}/friend`)
+    setFriendStatus('none')
+    fetchFriends()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+  const handleLike = async (postId) => {
+  try {
+    await api.post(`/api/likes/Post/${postId}`)
+    fetchPosts()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const fetchComments = async (postId) => {
+  try {
+    const res = await api.get(`/api/posts/${postId}/comments`)
+    setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
   } catch (err) {
     console.error(err)
   }
@@ -148,41 +121,23 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content: text }),
-    })
-    if (res.ok) {
-      setCommentText((prev) => ({ ...prev, [postId]: '' }))
-      fetchComments(postId)
-      fetchPosts()
-    }
+    await api.post(`/api/posts/${postId}/comments`, { content: text })
+    setCommentText((prev) => ({ ...prev, [postId]: '' }))
+    fetchComments(postId)
+    fetchPosts()
   } catch (err) {
     console.error(err)
   }
 }
 
-  const handleChat = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/chats`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      })
-      if (res.ok) {
-        navigate('/chat')
-      }
-    } catch (err) {
-      console.error(err)
-    }
+const handleChat = async () => {
+  try {
+    await api.post('/api/chats', { userId })
+    navigate('/chat')
+  } catch (err) {
+    console.error(err)
   }
+}
 
   if (loading) {
     return (

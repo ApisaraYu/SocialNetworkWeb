@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../../services/api'
+import api from '../../services/api'
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate()
@@ -13,32 +13,21 @@ const ForgotPasswordPage = () => {
   }
 
   const handleConfirm = async () => {
-    if (!form.email) return setError('กรุณากรอกอีเมล์')
-    if (!form.securityAnswer.trim()) return setError('กรุณาตอบคำถามความปลอดภัย')
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
-
-      navigate('/reset-password', {
-        state: { resetToken: data.data.resetToken },
-      })
-    } catch (err) {
-      setError('ไม่สามารถเชื่อมต่อกับ server ได้')
-    } finally {
-      setLoading(false)
-    }
+  if (!form.email) return setError('กรุณากรอกอีเมล์')
+  if (!form.securityAnswer.trim()) return setError('กรุณาตอบคำถามความปลอดภัย')
+  setError('')
+  setLoading(true)
+  try {
+    const res = await api.post('/api/auth/forgot-password', form)
+    navigate('/reset-password', {
+      state: { resetToken: res.data.data.resetToken },
+    })
+  } catch (err) {
+    setError(err.response?.data?.message || 'ไม่สามารถเชื่อมต่อกับ server ได้')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen bg-[#7C6FF7] flex items-center justify-center px-4">

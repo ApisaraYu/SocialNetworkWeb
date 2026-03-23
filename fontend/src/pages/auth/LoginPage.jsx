@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../../services/api'
+import api from '../../services/api'
 import { useSocket } from '../../context/SocketContext'
 
 const LoginPage = () => {
@@ -20,18 +20,7 @@ const LoginPage = () => {
     setLoading(true)
     try {
       console.log('กำลัง fetch...')
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // ส่ง cookie refresh token
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
+      const res = await api.post('/api/auth/login', form)
 
       // เก็บ access token ไว้ใน localStorage
       localStorage.setItem('user', JSON.stringify(data.user))

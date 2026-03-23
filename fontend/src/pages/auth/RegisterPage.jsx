@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import API_URL from '../../services/api'
+import api from '../../services/api'
 import { useNavigate } from 'react-router-dom'
 
 const validatePassword = (password) => {
@@ -37,18 +37,7 @@ const RegisterPage = () => {
 
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
-
+      await api.post('/api/auth/register', form)
       // สมัครสำเร็จ → ไปหน้า timeline ได้เลย
       navigate('/timeline')
     } catch (err) {

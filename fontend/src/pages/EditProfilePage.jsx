@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API_URL from '../services/api'
+import api from '../services/api'
 import Layout from '../components/common/Layout'
 
 const EditProfilePage = () => {
@@ -19,34 +19,29 @@ const EditProfilePage = () => {
 
   //โหลดข้อมูลปจบ.
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        if (res.ok) {
-          setForm({
-            username: data.data.username || '',
-            bio: data.data.bio || '',
-          })
-          setAvatarPreview(data.data.avatar?.url || null)
-          setCoverPreview(data.data.coverPhoto?.url || null)
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    }
-    fetchMe()
-  }, [])
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setAvatarFile(file)
-      setAvatarPreview(URL.createObjectURL(file))
+  const fetchMe = async () => {
+    try {
+      const res = await api.get('/api/users/me')
+      setForm({
+        username: res.data.data.username || '',
+        bio: res.data.data.bio || '',
+      })
+      setAvatarPreview(res.data.data.avatar?.url || null)
+      setCoverPreview(res.data.data.coverPhoto?.url || null)
+    } catch (err) {
+      console.error(err)
     }
   }
+  fetchMe()
+}, [])
+
+const handleAvatarChange = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    setAvatarFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
+  }
+}
 
   const handleCoverChange = (e) => {
     const file = e.target.files[0]
@@ -62,47 +57,24 @@ const EditProfilePage = () => {
     setLoading(true)
 
     try {
-      // 1. อัปเดต username และ bio
-      const res = await fetch(`${API_URL}/api/users/me`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: form.username, bio: form.bio }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.message || 'เกิดข้อผิดพลาด')
-        return
-      }
+  // 1. อัปเดต username และ bio
+  const res = await api.put('/api/users/me', { username: form.username, bio: form.bio })
 
-      // 2. อัปโหลด avatar ถ้ามีการเปลี่ยน
-      let newAvatarUrl = currentUser.avatar?.url || ''
-      if (avatarFile) {
-        const formData = new FormData()
-        formData.append('avatar', avatarFile)
-        const avatarRes = await fetch(`${API_URL}/api/users/me/avatar`, {
-          method: 'PUT',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        })
-        const avatarData = await avatarRes.json()
-        if (avatarRes.ok) {
-          newAvatarUrl = avatarData.data.avatar?.url || newAvatarUrl
-        }
-      }
+  // 2. อัปโหลด avatar ถ้ามีการเปลี่ยน
+  let newAvatarUrl = currentUser.avatar?.url || ''
+  if (avatarFile) {
+    const formData = new FormData()
+    formData.append('avatar', avatarFile)
+    const avatarRes = await api.put('/api/users/me/avatar', formData)
+    newAvatarUrl = avatarRes.data.data.avatar?.url || newAvatarUrl
+  }
 
-      // 3. อัปโหลด cover ถ้ามีการเปลี่ยน
-      if (coverFile) {
-        const formData = new FormData()
-        formData.append('coverPhoto', coverFile)
-        await fetch(`${API_URL}/api/users/me/cover`, {
-          method: 'PUT',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        })
-      }
+  // 3. อัปโหลด cover ถ้ามีการเปลี่ยน
+  if (coverFile) {
+    const formData = new FormData()
+    formData.append('coverPhoto', coverFile)
+    await api.put('/api/users/me/cover', formData)
+  }
 
       // 4. อัปเดต localStorage ให้ครบทุก field
       localStorage.setItem('user', JSON.stringify({
