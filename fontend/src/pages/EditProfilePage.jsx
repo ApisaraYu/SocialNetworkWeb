@@ -21,7 +21,7 @@ const EditProfilePage = () => {
   useEffect(() => {
   const fetchMe = async () => {
     try {
-      const res = await api.get('/api/users/me')
+      const res = await api.get('/users/me')
       setForm({
         username: res.data.data.username || '',
         bio: res.data.data.bio || '',
@@ -58,14 +58,14 @@ const handleAvatarChange = (e) => {
 
     try {
   // 1. อัปเดต username และ bio
-  const res = await api.put('/api/users/me', { username: form.username, bio: form.bio })
+  const res = await api.put('/users/me', { username: form.username, bio: form.bio })
 
   // 2. อัปโหลด avatar ถ้ามีการเปลี่ยน
   let newAvatarUrl = currentUser.avatar?.url || ''
   if (avatarFile) {
     const formData = new FormData()
     formData.append('avatar', avatarFile)
-    const avatarRes = await api.put('/api/users/me/avatar', formData)
+    const avatarRes = await api.put('/users/me/avatar', formData)
     newAvatarUrl = avatarRes.data.data.avatar?.url || newAvatarUrl
   }
 
@@ -73,7 +73,7 @@ const handleAvatarChange = (e) => {
   if (coverFile) {
     const formData = new FormData()
     formData.append('coverPhoto', coverFile)
-    await api.put('/api/users/me/cover', formData)
+    await api.put('/users/me/cover', formData)
   }
 
       // 4. อัปเดต localStorage ให้ครบทุก field

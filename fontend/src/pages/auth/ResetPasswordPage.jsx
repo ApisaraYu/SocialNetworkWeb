@@ -46,7 +46,7 @@ const ResetPasswordPage = () => {
     setError('')
     setLoading(true)
     try {
-      await api.post('/api/auth/reset-password', { resetToken, newPassword })
+      await api.post('/auth/reset-password', { resetToken, newPassword })
 
       if (!res.ok) {
         setError(data.message || 'เกิดข้อผิดพลาด')

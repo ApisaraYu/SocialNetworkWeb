@@ -24,7 +24,7 @@ const GroupPage = () => {
   const fetchMyGroups = async () => {
   setLoading(true)
   try {
-    const res = await api.get('/api/groups/my')
+    const res = await api.get('/groups/my')
     setMyGroups(res.data.data || [])
   } catch (err) {
     console.error(err)
@@ -42,7 +42,7 @@ const GroupPage = () => {
     return
   }
   try {
-    const res = await api.get(`/api/groups/search?q=${value}`)
+    const res = await api.get(`/groups/search?q=${value}`)
     setSearchResults(res.data.data || [])
   } catch (err) {
     console.error(err)
@@ -52,21 +52,21 @@ const GroupPage = () => {
 const handleCreate = async () => {
   if (!createForm.name) return
   try {
-    const res = await api.post('/api/groups', createForm)
+    const res = await api.post('/groups', createForm)
     const groupId = res.data.data._id
 
     // อัปโหลด avatar ถ้ามี
     if (avatarFile) {
       const formData = new FormData()
       formData.append('avatar', avatarFile)
-      await api.put(`/api/groups/${groupId}/avatar`, formData)
+      await api.put(`/groups/${groupId}/avatar`, formData)
     }
 
     // อัปโหลด cover ถ้ามี
     if (coverFile) {
       const formData = new FormData()
       formData.append('coverPhoto', coverFile)
-      await api.put(`/api/groups/${groupId}/cover`, formData)
+      await api.put(`/groups/${groupId}/cover`, formData)
     }
 
     setShowCreate(false)

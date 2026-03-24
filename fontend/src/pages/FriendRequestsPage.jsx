@@ -11,7 +11,7 @@ const FriendRequestsPage = () => {
 
   const fetchRequests = async () => {
   try {
-    const res = await api.get('/api/users/friend-requests')
+    const res = await api.get('/users/friend-requests')
     setRequests(res.data.data || [])
   } catch (err) {
     console.error(err)
@@ -26,7 +26,7 @@ const FriendRequestsPage = () => {
 
   const handleRespond = async (userId, action) => {
   try {
-    await api.put('/api/users/friend-request/respond', { fromUserId: userId, action })
+    await api.put('/users/friend-request/respond', { fromUserId: userId, action })
     fetchRequests()
   } catch (err) {
     console.error(err)

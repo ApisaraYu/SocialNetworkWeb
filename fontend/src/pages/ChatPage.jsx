@@ -22,7 +22,7 @@ const ChatPage = () => {
   // ดึงรายการแชท
   const fetchConversations = async () => {
   try {
-    const res = await api.get('/api/chats')
+    const res = await api.get('/chats')
     setConversations(res.data.data || [])
   } catch (err) {
     console.error(err)
@@ -32,7 +32,7 @@ const ChatPage = () => {
 const fetchMessages = async (convId) => {
   setLoading(true)
   try {
-    const res = await api.get(`/api/chats/${convId}/messages`)
+    const res = await api.get(`/chats/${convId}/messages`)
     setMessages(res.data.data.messages || [])
   } catch (err) {
     console.error(err)
@@ -68,7 +68,7 @@ const fetchMessages = async (convId) => {
   if (socket) {
     socket.emit('join_room', conv._id)
   }
-  await api.put(`/api/chats/${conv._id}/read`)
+  await api.put(`/chats/${conv._id}/read`)
 }
 
   const handleFileChange = (e) => {
@@ -85,7 +85,7 @@ const fetchMessages = async (convId) => {
     const formData = new FormData()
     if (text.trim()) formData.append('content', text)
     if (file) formData.append('media', file)
-    await api.post(`/api/chats/${selectedConv._id}/messages`, formData)
+    await api.post(`/chats/${selectedConv._id}/messages`, formData)
     setText('')
     setFile(null)
     setPreview(null)

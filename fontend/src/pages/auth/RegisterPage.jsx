@@ -37,7 +37,7 @@ const RegisterPage = () => {
 
     setLoading(true)
     try {
-      await api.post('/api/auth/register', form)
+      await api.post('/auth/register', form)
       // สมัครสำเร็จ → ไปหน้า timeline ได้เลย
       navigate('/timeline')
     } catch (err) {

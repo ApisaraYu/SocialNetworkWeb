@@ -26,7 +26,7 @@ const ProfilePage = () => {
   // ดึงข้อมูล profile
   const fetchProfile = async () => {
   try {
-    const res = await api.get(`/api/users/${userId}`)
+    const res = await api.get(`/users/${userId}`)
     setProfile(res.data.data)
   } catch (err) {
     console.error(err)
@@ -36,7 +36,7 @@ const ProfilePage = () => {
   // ดึงโพสต์ของ user
   const fetchPosts = async () => {
   try {
-    const res = await api.get(`/api/posts/user/${userId}`)
+    const res = await api.get(`/posts/user/${userId}`)
     setPosts(res.data.data.posts)
   } catch (err) {
     console.error(err)
@@ -48,7 +48,7 @@ const ProfilePage = () => {
   // ดึงรายชื่อเพื่อน
   const fetchFriends = async () => {
   try {
-    const res = await api.get(`/api/users/${userId}/friends`)
+    const res = await api.get(`/users/${userId}/friends`)
     setFriends(res.data.data || [])
   } catch (err) {
     console.error(err)
@@ -58,7 +58,7 @@ const ProfilePage = () => {
   // เช็คสถานะเพื่อน
   const fetchFriendStatus = async () => {
   try {
-    const res = await api.get(`/api/users/${userId}/friend-status`)
+    const res = await api.get(`/users/${userId}/friend-status`)
     setFriendStatus(res.data.data.status)
   } catch (err) {
     console.error(err)
@@ -75,7 +75,7 @@ const ProfilePage = () => {
   // ส่งคำขอเพื่อน
   const handleFriendRequest = async () => {
   try {
-    await api.post(`/api/users/${userId}/friend-request`)
+    await api.post(`/users/${userId}/friend-request`)
     setFriendStatus('pending')
   } catch (err) {
     console.error(err)
@@ -85,7 +85,7 @@ const ProfilePage = () => {
   // ลบเพื่อน
   const handleRemoveFriend = async () => {
   try {
-    await api.delete(`/api/users/${userId}/friend`)
+    await api.delete(`/users/${userId}/friend`)
     setFriendStatus('none')
     fetchFriends()
   } catch (err) {
@@ -95,7 +95,7 @@ const ProfilePage = () => {
 
   const handleLike = async (postId) => {
   try {
-    await api.post(`/api/likes/Post/${postId}`)
+    await api.post(`/likes/Post/${postId}`)
     fetchPosts()
   } catch (err) {
     console.error(err)
@@ -104,7 +104,7 @@ const ProfilePage = () => {
 
 const fetchComments = async (postId) => {
   try {
-    const res = await api.get(`/api/posts/${postId}/comments`)
+    const res = await api.get(`/posts/${postId}/comments`)
     setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
   } catch (err) {
     console.error(err)
@@ -121,7 +121,7 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    await api.post(`/api/posts/${postId}/comments`, { content: text })
+    await api.post(`/posts/${postId}/comments`, { content: text })
     setCommentText((prev) => ({ ...prev, [postId]: '' }))
     fetchComments(postId)
     fetchPosts()
@@ -132,7 +132,7 @@ const handleComment = async (postId) => {
 
 const handleChat = async () => {
   try {
-    await api.post('/api/chats', { userId })
+    await api.post('/chats', { userId })
     navigate('/chat')
   } catch (err) {
     console.error(err)

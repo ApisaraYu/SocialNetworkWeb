@@ -18,7 +18,7 @@ const TimelinePage = () => {
   const fetchPosts = async () => {
   setLoading(true)
   try {
-    const res = await api.get('/api/posts/timeline')
+    const res = await api.get('/posts/timeline')
     setPosts(res.data.data.posts)
   } catch (err) {
     console.error(err)
@@ -40,35 +40,31 @@ const TimelinePage = () => {
   }
 
   const handlePost = async () => {
-    if (!content && !file) return
-    setPosting(true)
-    try {
-      const formData = new FormData()
-      if (content) formData.append('content', content)
-      if (file) formData.append('media', file)
+  if (!content && !file) return
+  setPosting(true)
+  try {
+    const formData = new FormData()
+    if (content) formData.append('content', content)
+    if (file) formData.append('media', file)
 
-      const res = await fetch(`${API_URL}/api/posts`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
+    await api.post('/posts', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
 
-      if (res.ok) {
-        setContent('')
-        setFile(null)
-        setPreview(null)
-        fetchPosts()
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setPosting(false)
-    }
+    setContent('')
+    setFile(null)
+    setPreview(null)
+    fetchPosts()
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setPosting(false)
   }
+}
 
   const handleDelete = async (postId) => {
   try {
-    await api.delete(`/api/posts/${postId}`)
+    await api.delete(`/posts/${postId}`)
     fetchPosts()
   } catch (err) {
     console.error(err)
@@ -76,7 +72,7 @@ const TimelinePage = () => {
 }
  const handleLike = async (postId) => {
   try {
-    await api.post(`/api/likes/Post/${postId}`)
+    await api.post(`/likes/Post/${postId}`)
     fetchPosts()
   } catch (err) {
     console.error(err)

@@ -32,7 +32,7 @@ const GroupDetailPage = () => {
   // ดึงข้อมูลกลุ่ม
   const fetchGroup = async () => {
   try {
-    const res = await api.get(`/api/groups/${groupId}`)
+    const res = await api.get(`/groups/${groupId}`)
     setGroup(res.data.data)
   } catch (err) {
     console.error(err)
@@ -41,7 +41,7 @@ const GroupDetailPage = () => {
 
 const fetchPosts = async () => {
   try {
-    const res = await api.get(`/api/groups/${groupId}/posts`)
+    const res = await api.get(`/groups/${groupId}/posts`)
     setPosts(res.data.data.posts || [])
     setIsMemberFromApi(res.data.data.isMember)
   } catch (err) {
@@ -53,7 +53,7 @@ const fetchPosts = async () => {
 
 const fetchPendingRequests = async () => {
   try {
-    const res = await api.get(`/api/groups/${groupId}`)
+    const res = await api.get(`/groups/${groupId}`)
     setPendingRequests(res.data.data.joinRequests || [])
   } catch (err) {
     console.error(err)
@@ -80,7 +80,7 @@ const fetchPendingRequests = async () => {
   // เข้าร่วมกลุ่ม
   const handleJoin = async () => {
   try {
-    await api.post(`/api/groups/${groupId}/join`)
+    await api.post(`/groups/${groupId}/join`)
     if (group.privacy === 'private') {
       setJoinRequested(true)
     } else {
@@ -94,7 +94,7 @@ const fetchPendingRequests = async () => {
 
 const handleApprove = async (userId, action) => {
   try {
-    await api.put(`/api/groups/${groupId}/join-request`, { userId, action })
+    await api.put(`/groups/${groupId}/join-request`, { userId, action })
     fetchGroup()
     fetchPendingRequests()
   } catch (err) {
@@ -104,7 +104,7 @@ const handleApprove = async (userId, action) => {
 
 const handleLeave = async () => {
   try {
-    await api.delete(`/api/groups/${groupId}/leave`)
+    await api.delete(`/groups/${groupId}/leave`)
     setShowLeaveModal(false)
     navigate('/groups')
   } catch (err) {
@@ -114,7 +114,7 @@ const handleLeave = async () => {
 
  const handleDelete = async () => {
   try {
-    await api.delete(`/api/groups/${groupId}`)
+    await api.delete(`/groups/${groupId}`)
     setShowDeleteModal(false)
     navigate('/groups')
   } catch (err) {
@@ -125,7 +125,7 @@ const handleLeave = async () => {
 const handleEdit = async () => {
   if (!editForm.name) return
   try {
-    await api.put(`/api/groups/${groupId}`, editForm)
+    await api.put(`/groups/${groupId}`, editForm)
     setShowEditModal(false)
     fetchGroup()
   } catch (err) {
@@ -139,7 +139,7 @@ const handleAvatarChange = async (e) => {
   try {
     const formData = new FormData()
     formData.append('avatar', file)
-    await api.put(`/api/groups/${groupId}/avatar`, formData)
+    await api.put(`/groups/${groupId}/avatar`, formData)
     fetchGroup()
   } catch (err) {
     console.error(err)
@@ -152,7 +152,7 @@ const handleCoverChange = async (e) => {
   try {
     const formData = new FormData()
     formData.append('coverPhoto', file)
-    await api.put(`/api/groups/${groupId}/cover`, formData)
+    await api.put(`/groups/${groupId}/cover`, formData)
     fetchGroup()
   } catch (err) {
     console.error(err)
@@ -167,7 +167,7 @@ const handleCoverChange = async (e) => {
     const formData = new FormData()
     if (content) formData.append('content', content)
     if (file) formData.append('media', file)
-    await api.post(`/api/groups/${groupId}/posts`, formData)
+    await api.post(`/groups/${groupId}/posts`, formData)
     setContent('')
     setFile(null)
     setPreview(null)
@@ -181,7 +181,7 @@ const handleCoverChange = async (e) => {
 
 const handleLike = async (postId) => {
   try {
-    const res = await api.post(`/api/likes/GroupPost/${postId}`)
+    const res = await api.post(`/likes/GroupPost/${postId}`)
     setPosts((prev) =>
       prev.map((p) =>
         p._id === postId
@@ -202,7 +202,7 @@ const handleLike = async (postId) => {
 
 const fetchComments = async (postId) => {
   try {
-    const res = await api.get(`/api/groups/${groupId}/posts/${postId}/comments`)
+    const res = await api.get(`/groups/${groupId}/posts/${postId}/comments`)
     setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
   } catch (err) {
     console.error(err)
@@ -219,7 +219,7 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    await api.post(`/api/groups/${groupId}/posts/${postId}/comments`, { content: text })
+    await api.post(`/groups/${groupId}/posts/${postId}/comments`, { content: text })
     setCommentText((prev) => ({ ...prev, [postId]: '' }))
     fetchComments(postId)
     setPosts((prev) =>
@@ -235,7 +235,7 @@ const handleComment = async (postId) => {
   // ลบโพสต์
  const handleDeletePost = async (postId) => {
   try {
-    await api.delete(`/api/groups/${groupId}/posts/${postId}`)
+    await api.delete(`/groups/${groupId}/posts/${postId}`)
     fetchPosts()
   } catch (err) {
     console.error(err)

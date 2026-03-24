@@ -18,7 +18,7 @@ const ForgotPasswordPage = () => {
   setError('')
   setLoading(true)
   try {
-    const res = await api.post('/api/auth/forgot-password', form)
+    const res = await api.post('/auth/forgot-password', form)
     navigate('/reset-password', {
       state: { resetToken: res.data.data.resetToken },
     })
