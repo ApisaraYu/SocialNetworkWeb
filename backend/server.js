@@ -48,11 +48,18 @@ app.use(cookieParser())
 
 // อนุญาตให้ Frontend ที่ระบุใน CLIENT_URL เรียก API ได้
 // credentials: true = อนุญาตให้ส่ง cookies มาด้วย
+const allowedOrigins = [
+  'http://localhost:5173',           // dev
+  process.env.CLIENT_URL,            // production (set ใน Render environment)
+].filter(Boolean)                    // กรอง undefined/null ออก ถ้า CLIENT_URL ไม่ได้ set
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',         // dev
-    process.env.CLIENT_URL           // production
-  ],
+  origin: (origin, callback) => {
+    // อนุญาต request ที่ไม่มี origin (เช่น Postman, server-to-server)
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    callback(new Error(`CORS: origin "${origin}" ไม่ได้รับอนุญาต`))
+  },
   credentials: true,
 }))
 
