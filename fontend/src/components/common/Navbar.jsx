@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import API_URL from '../../services/api'
+import api from '../../services/api'
 import { useSocket } from '../../context/SocketContext'
 import { useNavigate } from 'react-router-dom'
 
@@ -11,17 +11,12 @@ const Navbar = () => {
   const [showResults, setShowResults] = useState(false)
   const [friendRequestCount, setFriendRequestCount] = useState(0)
 
-  const token = localStorage.getItem('accessToken')
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
-  // ดึงจำนวนคำขอเพื่อน
   const fetchFriendRequestCount = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/users/friend-requests`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) setFriendRequestCount(data.data?.length || 0)
+      const res = await api.get('/users/friend-requests')
+      setFriendRequestCount(res.data.data?.length || 0)
     } catch (err) {
       console.error(err)
     }
@@ -29,7 +24,6 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchFriendRequestCount()
-    // ดึงทุก 30 วินาที
     const interval = setInterval(fetchFriendRequestCount, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -52,14 +46,9 @@ const Navbar = () => {
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/users/search?q=${value}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setResults(data.data || [])
-        setShowResults(true)
-      }
+      const res = await api.get(`/users/search?q=${value}`)
+      setResults(res.data.data || [])
+      setShowResults(true)
     } catch (err) {
       console.error(err)
     }
@@ -93,7 +82,6 @@ const Navbar = () => {
           className="w-full bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-2 text-sm outline-none focus:bg-white/30 transition"
         />
 
-        {/* Search Results Dropdown */}
         {showResults && results.length > 0 && (
           <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-lg overflow-hidden z-50">
             {results.map((user) => (
@@ -119,7 +107,6 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* No Results */}
         {showResults && results.length === 0 && search.trim() && (
           <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-lg px-4 py-3 z-50">
             <p className="text-sm text-gray-400">ไม่พบผู้ใช้</p>
@@ -130,7 +117,6 @@ const Navbar = () => {
       {/* Right Actions */}
       <div className="flex items-center gap-3 flex-shrink-0">
 
-        {/* แจ้งเตือนคำขอเพื่อน */}
         <button
           onClick={() => navigate('/friend-requests')}
           className="relative w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition cursor-pointer"
@@ -143,11 +129,10 @@ const Navbar = () => {
           )}
         </button>
 
-        {/* แชท */}
         <button
           onClick={() => {
             navigate('/chat')
-            setUnreadCount(0) // clear เมื่อเปิดแชท
+            setUnreadCount(0)
           }}
           className="relative w-9 h-9 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition cursor-pointer"
         >
@@ -159,7 +144,6 @@ const Navbar = () => {
           )}
         </button>
 
-        {/* Avatar */}
         <button
           onClick={() => navigate('/profile')}
           className="w-9 h-9 rounded-full bg-white/30 flex items-center justify-center hover:bg-white/40 transition border-2 border-white overflow-hidden cursor-pointer"
@@ -173,7 +157,6 @@ const Navbar = () => {
           )}
         </button>
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
           className="text-white/80 text-sm hover:text-white transition cursor-pointer"
