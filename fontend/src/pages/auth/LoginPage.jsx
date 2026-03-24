@@ -26,7 +26,7 @@ const LoginPage = () => {
       password: form.password,
     })
 
-    const { accessToken, user } = res.data.data
+    const { accessToken, user } = res.data
 
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('user', JSON.stringify(user))
