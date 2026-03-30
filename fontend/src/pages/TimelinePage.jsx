@@ -81,7 +81,7 @@ const TimelinePage = () => {
 
 const fetchComments = async (postId) => {
   try {
-    const res = await api.get(`/api/posts/${postId}/comments`)
+    const res = await api.get(`/posts/${postId}/comments`)
     setComments((prev) => ({ ...prev, [postId]: res.data.data.comments }))
   } catch (err) {
     console.error(err)
@@ -98,7 +98,7 @@ const handleComment = async (postId) => {
   const text = commentText[postId]?.trim()
   if (!text) return
   try {
-    await api.post(`/api/posts/${postId}/comments`, { content: text })
+    await api.post(`/posts/${postId}/comments`, { content: text })
     setCommentText((prev) => ({ ...prev, [postId]: '' }))
     fetchComments(postId)
     fetchPosts()
